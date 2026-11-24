@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { NewsCard } from "@/components/news-card";
 import { stories } from "@/lib/stories";
-import { getLocale, t, localizeStory } from "@/lib/i18n";
+import { getLocale } from "@/lib/locale";
+import { t, localizeStory } from "@/lib/i18n";
 
 export default async function NewsPage() {
   const locale = await getLocale();
