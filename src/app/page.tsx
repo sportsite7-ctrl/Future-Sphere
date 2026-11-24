@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NewsCard } from "@/components/news-card";
+import { NewsImage } from "@/components/news-image";
 import { BrandSymbol } from "@/components/brand-symbol";
 import { categories, stories } from "@/lib/stories";
 import { getLocale } from "@/lib/locale";
@@ -22,7 +23,7 @@ export default async function HomePage() {
           <div className="hero-actions"><Link href="/category/ai-models" className="button-primary">{copy.explore} <span>↗</span></Link><Link href="/about" className="button-quiet">{copy.howItWorks} <span>→</span></Link></div>
         </div>
         <Link href={`/article/${lead.slug}`} className="lead-story">
-          <div className="lead-image" style={{ backgroundImage: `url("${lead.image}")` }} /><div className="lead-overlay" />
+          <NewsImage src={lead.image} alt={lead.imageAlt} className="lead-image" priority /><div className="lead-overlay" />
           <div className="lead-content">
             <div className="lead-topline"><span className="lead-label">{copy.editorPick}</span><span>{lead.readTime}</span></div>
             <div><span className="lead-category">{lead.category}</span><h2>{lead.title}</h2><p>{lead.excerpt}</p><span className="lead-read">{copy.read} <b>↗</b></span></div>
