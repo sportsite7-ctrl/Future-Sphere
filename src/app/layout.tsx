@@ -2,23 +2,26 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { getLocale, t } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: { default: "Future Sphere — світ штучного інтелекту", template: "%s | Future Sphere" },
-  description: "Новини, дослідження та зрозумілі пояснення про штучний інтелект і технології майбутнього.",
+  title: { default: "Future Sphere — AI news and insights", template: "%s | Future Sphere" },
+  description: "News, research and clear explanations about artificial intelligence and emerging technology.",
   applicationName: "Future Sphere",
-  openGraph: { title: "Future Sphere", description: "Технології майбутнього — зрозуміло сьогодні.", type: "website", locale: "uk_UA" },
+  openGraph: { title: "Future Sphere", description: "Tomorrow's technology, understood today.", type: "website" },
   robots: { index: false, follow: false }
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
+  const copy = t(locale);
   return (
-    <html lang="uk">
+    <html lang={locale}>
       <body>
-        <div className="demo-ribbon"><span>ПРОТОТИП</span> Демонстраційна версія — матеріали на сторінках є прикладами, а не актуальними новинами.</div>
-        <SiteHeader />
+        <div className="demo-ribbon"><span>{locale === "en" ? "PROTOTYPE" : "ПРОТОТИП"}</span> {copy.prototype}</div>
+        <SiteHeader locale={locale} />
         <main>{children}</main>
-        <SiteFooter />
+        <SiteFooter locale={locale} />
       </body>
     </html>
   );
