@@ -61,7 +61,7 @@ body::before{content:"";position:fixed;inset:-18%;z-index:-1;pointer-events:none
 
 /* Compact bilingual language switch */
 .language-switch{display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid #e1e8e9;border-radius:22px;background:rgba(255,255,255,.82)}
-.language-switch button{min-width:31px;height:25px;padding:0 7px;border:0;border-radius:16px;background:transparent;color:#82919a;font:700 9px/1 inherit;letter-spacing:.06em;cursor:pointer;transition:background .18s,color .18s,box-shadow .18s}
+.language-switch button{min-width:31px;height:25px;padding:0 7px;border:0;border-radius:16px;background:transparent;color:#82919a;font:inherit;font-size:9px;font-weight:700;line-height:1;letter-spacing:.06em;cursor:pointer;transition:background .18s,color .18s,box-shadow .18s}
 .language-switch button:hover{color:#456e8b}
 .language-switch button.is-active{background:#e8f1f6;color:#426f90;box-shadow:inset 0 0 0 1px #d9e7ef}
 @media(max-width:640px){.language-switch{gap:1px;padding:2px}.language-switch button{min-width:28px;height:24px;padding:0 6px;font-size:8px}}
