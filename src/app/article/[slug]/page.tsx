@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NewsCard } from "@/components/news-card";
 import { stories } from "@/lib/stories";
-import { getLocale, t, localizeStory } from "@/lib/i18n";
+import { getLocale } from "@/lib/locale";
+import { t, localizeStory } from "@/lib/i18n";
 
 export function generateStaticParams() { return stories.map((story) => ({ slug: story.slug })); }
 
