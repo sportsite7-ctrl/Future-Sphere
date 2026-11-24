@@ -1,19 +1,18 @@
 import Link from "next/link";
 import { NewsCard } from "@/components/news-card";
 import { stories } from "@/lib/stories";
+import { getLocale, t, localizeStory } from "@/lib/i18n";
 
-export const metadata = {
-  title: "Усі матеріали",
-  description: "Усі демонстраційні матеріали Future Sphere про штучний інтелект, моделі, інструменти та дослідження."
-};
-
-export default function NewsPage() {
+export default async function NewsPage() {
+  const locale = await getLocale();
+  const copy = t(locale);
+  const items = stories.map((story) => localizeStory(story, locale));
   return (
     <section className="listing-page page-shell">
-      <div className="article-breadcrumb"><Link href="/">Головна</Link><span>/</span><span>Усі матеріали</span></div>
-      <div className="listing-heading"><div className="section-kicker">БІБЛІОТЕКА FUTURE SPHERE</div><h1>Усі матеріали<span>.</span></h1><p>Добірка матеріалів про нові моделі, AI-інструменти, дослідження та технології. Зараз тут розміщені демонстраційні публікації.</p></div>
-      <div className="news-listing-meta"><span>{stories.length} матеріалів</span><span><i /> Демонстраційна стрічка</span></div>
-      <div className="listing-grid">{stories.map((story) => <NewsCard key={story.slug} story={story} />)}</div>
+      <div className="article-breadcrumb"><Link href="/">{copy.home}</Link><span>/</span><span>{copy.allNews}</span></div>
+      <div className="listing-heading"><div className="section-kicker">{copy.library}</div><h1>{copy.allNews}<span>.</span></h1><p>{copy.listingDescription}</p></div>
+      <div className="news-listing-meta"><span>{items.length} {locale === "en" ? "stories" : "матеріалів"}</span><span><i /> {copy.demoLabel}</span></div>
+      <div className="listing-grid">{items.map((story) => <NewsCard key={story.slug} story={story} locale={locale} />)}</div>
     </section>
   );
 }
