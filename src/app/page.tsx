@@ -2,7 +2,7 @@ import Link from "next/link";
 import { NewsCard } from "@/components/news-card";
 import { NewsImage } from "@/components/news-image";
 import { BrandSymbol } from "@/components/brand-symbol";
-import { categories, stories } from "@/lib/stories";
+import { getCategories, getStories } from "@/lib/content";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
 import { localizeStory } from "@/lib/i18n";
@@ -10,9 +10,11 @@ import { localizeStory } from "@/lib/i18n";
 export default async function HomePage() {
   const locale = await getLocale();
   const copy = t(locale);
-  const lead = localizeStory(stories[0], locale);
-  const secondary = stories.slice(1, 3).map((story) => localizeStory(story, locale));
-  const latest = stories.slice(3).map((story) => localizeStory(story, locale));
+  const [stories, categories] = await Promise.all([getStories(locale), getCategories(locale)]);
+  const orderedStories = [...stories].sort((a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)));
+  const lead = localizeStory(orderedStories[0], locale);
+  const secondary = orderedStories.slice(1, 3).map((story) => localizeStory(story, locale));
+  const latest = orderedStories.slice(3).map((story) => localizeStory(story, locale));
   return (
     <>
       <section className="hero-section page-shell">
@@ -31,14 +33,14 @@ export default async function HomePage() {
         </Link>
       </section>
       <section className="category-strip page-shell"><div className="section-kicker">{copy.navigation}</div><div className="category-pills">
-        {categories.map((category) => <Link key={category.slug} href={`/category/${category.slug}`} className="category-pill">{copy.categories[category.slug as keyof typeof copy.categories][0]}<span>↗</span></Link>)}
+        {categories.map((category) => <Link key={category.slug} href={`/category/${category.slug}`} className="category-pill">{category.name}<span>↗</span></Link>)}
       </div></section>
       <section className="content-section page-shell">
         <div className="section-heading"><div><div className="section-kicker">{copy.worthKnowing}</div><h2>{copy.ideas}<span>.</span></h2></div><Link href="/news" className="view-all">{copy.allMaterials} <span>↗</span></Link></div>
         <div className="feature-grid">{secondary.map((story) => <NewsCard key={story.slug} story={story} locale={locale} />)}</div>
       </section>
       <section className="latest-section"><div className="page-shell latest-layout">
-        <div className="latest-main"><div className="section-heading"><div><div className="section-kicker">{copy.freshView}</div><h2>{copy.latest}<span>.</span></h2></div><span className="demo-status"><i /> {copy.demoFeed}</span></div>
+        <div className="latest-main"><div className="section-heading"><div><div className="section-kicker">{copy.freshView}</div><h2>{copy.latest}<span>.</span></h2></div>{latest.some((story) => story.isDemo) || lead.isDemo ? <span className="demo-status"><i /> {copy.demoFeed}</span> : <span className="demo-status"><i /> {locale === "en" ? "Published stories" : "Опубліковані матеріали"}</span></div>
           <div className="latest-grid">{latest.map((story) => <NewsCard key={story.slug} story={story} locale={locale} />)}</div>
           <Link href="/news" className="text-link all-news-link">{copy.allMaterials} <span>↗</span></Link>
         </div>
