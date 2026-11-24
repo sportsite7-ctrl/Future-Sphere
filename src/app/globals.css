@@ -65,3 +65,14 @@ body::before{content:"";position:fixed;inset:-18%;z-index:-1;pointer-events:none
 .language-switch button:hover{color:#456e8b}
 .language-switch button.is-active{background:#e8f1f6;color:#426f90;box-shadow:inset 0 0 0 1px #d9e7ef}
 @media(max-width:640px){.language-switch{gap:1px;padding:2px}.language-switch button{min-width:28px;height:24px;padding:0 6px;font-size:8px}}
+
+
+/* Editorial image rendering: preserve detail and crop consistently. */
+.card-image-wrap{height:220px;position:relative;overflow:hidden;border-radius:8px;background:#e7edf0}
+.card-image-wrap .card-image{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.card-image-wrap .image-category{z-index:1}
+.card-image-link:hover .card-image{transform:scale(1.035)}
+.lead-image{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.article-cover{display:block;width:100%;object-fit:cover;object-position:center}
+@media(max-width:900px){.card-image-wrap{height:220px}}
+@media(max-width:640px){.card-image-wrap{height:205px}.latest-grid .card-image-wrap{height:205px}.listing-grid .card-image-wrap{height:210px}}
