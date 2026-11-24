@@ -74,17 +74,16 @@ function parseJsonResponse(text) {
 }
 
 async function generateEditorialPackage({ title, excerpt, sourceUrl, sourceName }) {
-  const prompt = `You are the careful bilingual editor of Future Sphere, an AI and technology news publication.
+  const prompt = `You are the Ukrainian-language editor of Future Sphere, an AI and technology news publication.
 
 Use ONLY the facts explicitly present in the supplied RSS title and description. Do not browse, invent details, infer numbers, add quotes, or claim you read the full linked article. The RSS description may be incomplete. If it contains little information, write a short cautious summary rather than filling gaps.
 
-Create two editorial versions of the same item: Ukrainian (uk) and English (en). Translate and rewrite naturally; do not merely copy the same English text into both languages. Keep names of products, models, companies, and technical terms accurate.
+Create exactly ONE editorial version in Ukrainian. The RSS source is normally in English; translate and adapt its facts into natural Ukrainian. Do not generate an English version. Keep names of products, models, companies, and technical terms accurate.
 
 Return valid JSON only, with exactly this structure:
 {
   "category": "ai-models | tools | research | technology | industry",
-  "uk": { "title": "string", "excerpt": "string", "body": "string" },
-  "en": { "title": "string", "excerpt": "string", "body": "string" }
+  "uk": { "title": "string", "excerpt": "string", "body": "string" }
 }
 
 Rules:
@@ -138,14 +137,15 @@ RSS description: ${excerpt || "(No description supplied)"}`;
         const result = parseJsonResponse(outputText);
         const allowedCategories = new Set(["ai-models", "tools", "research", "technology", "industry"]);
         if (!allowedCategories.has(result.category)) result.category = "technology";
-        for (const lang of ["uk", "en"]) {
-          const item = result[lang];
-          if (!item || !clean(item.title) || !clean(item.excerpt) || !clean(item.body)) {
-            throw new Error(`Gemini response is missing valid ${lang} editorial fields.`);
-          }
-          item.title = clean(item.title).slice(0, 180);
-          item.excerpt = clean(item.excerpt).slice(0, 600);
-          item.body = String(item.body).trim().slice(0, 5000);
+        const item = result.uk;
+        if (!item || !clean(item.title) || !clean(item.excerpt) || !clean(item.body)) {
+          throw new Error("Gemini response is missing valid Ukrainian editorial fields.");
+        }
+        item.title = clean(item.title).slice(0, 180);
+        item.excerpt = clean(item.excerpt).slice(0, 600);
+        item.body = String(item.body).trim().slice(0, 5000);
+        if (item.body.length < 35) {
+          throw new Error("Gemini Ukrainian article is too short; item was not published.");
         }
         modelSuccesses.set(model, (modelSuccesses.get(model) || 0) + 1);
         console.log(`Gemini model selected: ${model}`);
@@ -223,7 +223,7 @@ async function findOrCreateArticle({ link, sourceId, categoryId, publishedAt }) 
 }
 
 async function saveTranslations(articleId, editorial) {
-  for (const lang of ["uk", "en"]) {
+  for (const lang of ["uk"]) {
     const value = editorial[lang];
     const slug = makeSlug(value.title, articleId);
     const row = {
@@ -291,14 +291,10 @@ for (const feedConfig of FEEDS) {
       if (translationsReadError) throw translationsReadError;
 
       const translationsByLang = new Map((existingTranslations || []).map((row) => [row.lang, row]));
-      const hasEditorialContent = ["uk", "en"].every((lang) => {
-        const row = translationsByLang.get(lang);
-        if (!row?.body) return false;
-        const body = String(row.body).trim();
-        return body !== String(row.excerpt || "").trim()
-          && body !== String(row.title || "").trim()
-          && body.length > 40;
-      });
+      const ukrainianRow = translationsByLang.get("uk");
+      const hasEditorialContent = Boolean(ukrainianRow?.body
+        && String(ukrainianRow.body).trim().length > 40
+        && String(ukrainianRow.body).trim() !== String(ukrainianRow.excerpt || "").trim());
       if (hasEditorialContent) {
         if (article.status === "draft") {
           const { error: publishExistingError } = await supabase.from("articles")
@@ -339,7 +335,7 @@ for (const feedConfig of FEEDS) {
         }
         await saveTranslations(article.id, editorial);
 
-        // Publish only after both language versions have been saved successfully.
+        // Publish only after the Ukrainian version has been saved and validated successfully.
         if (article.status === "draft") {
           const { error: publishError } = await supabase.from("articles")
             .update({ category_id: categoryId, status: "published" })
@@ -380,7 +376,7 @@ const markdown = [
   `- **Gemini circuit breaker:** ${aiCircuitOpen ? "opened; further AI calls stopped" : "not triggered"}`,
   `- **Successful Gemini models:** ${Object.keys(Object.fromEntries(modelSuccesses)).join(", ") || "none"}`,
   "",
-  "_Only items with both language versions saved successfully are published. Every article retains its original source URL._", "",
+  "_Only items with a validated Ukrainian version saved successfully are published. Every article retains its original source URL._", "",
 ].join("\n");
 if (process.env.GITHUB_STEP_SUMMARY) {
   const { appendFile } = await import("node:fs/promises");
