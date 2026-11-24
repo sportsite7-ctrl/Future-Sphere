@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { NewsCard } from "@/components/news-card";
-import { stories } from "@/lib/stories";
+import { getStories } from "@/lib/content";
 import { getLocale } from "@/lib/locale";
 import { t, localizeStory } from "@/lib/i18n";
 
@@ -9,7 +9,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const locale = await getLocale();
   const copy = t(locale);
   const query = q.trim().toLocaleLowerCase(locale === "uk" ? "uk" : "en");
-  const localized = stories.map((story) => localizeStory(story, locale));
+  const localized = (await getStories(locale)).map((story) => localizeStory(story, locale));
   const results = query ? localized.filter((story) => [story.title, story.excerpt, story.category, ...story.body].join(" ").toLocaleLowerCase(locale === "uk" ? "uk" : "en").includes(query)) : [];
   return <section className="listing-page page-shell search-page">
     <div className="article-breadcrumb"><Link href="/">{copy.home}</Link><span>/</span><span>{copy.search}</span></div>
