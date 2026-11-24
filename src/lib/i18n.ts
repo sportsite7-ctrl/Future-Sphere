@@ -1,12 +1,6 @@
-import { cookies } from "next/headers";
 import type { Story } from "@/lib/stories";
 
 export type Locale = "uk" | "en";
-
-export async function getLocale(): Promise<Locale> {
-  const value = (await cookies()).get("fs-locale")?.value;
-  return value === "en" ? "en" : "uk";
-}
 
 const ui = {
   uk: {
