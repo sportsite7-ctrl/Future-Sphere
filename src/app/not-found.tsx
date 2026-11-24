@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { getLocale, t } from "@/lib/i18n";
 
-export default function NotFound() {
-  return <section className="not-found page-shell"><span className="section-kicker">404 · НЕ ЗНАЙДЕНО</span><h1>Ця сторінка<br /><span>поза орбітою.</span></h1><p>Схоже, такого матеріалу поки немає або посилання змінилося.</p><Link href="/" className="button-primary">На головну <span>↗</span></Link></section>;
+export default async function NotFound() {
+  const locale = await getLocale();
+  const copy = t(locale);
+  return <section className="not-found page-shell"><span className="section-kicker">404 · {locale === "en" ? "NOT FOUND" : "НЕ ЗНАЙДЕНО"}</span><h1>{copy.notFound}</h1><p>{copy.notFoundText}</p><Link href="/" className="button-primary">{copy.goHome} <span>↗</span></Link></section>;
 }
