@@ -5,6 +5,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: { default: "Future Sphere — AI news and insights", template: "%s | Future Sphere" },
   description: "News, research and clear explanations about artificial intelligence and emerging technology.",
