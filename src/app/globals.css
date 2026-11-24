@@ -33,3 +33,28 @@ body::before{content:"";position:fixed;inset:-18%;z-index:-1;pointer-events:none
 .footer-brand .brand-symbol{width:34px;height:34px}
 @media(prefers-reduced-motion:reduce){body::before{animation:none}.brand-symbol{transition:none}}
 @media(max-width:640px){.brand-symbol{width:33px;height:33px}.manifesto-mark{width:58px;height:58px}.brand-symbol-large{width:55px;height:55px}}
+
+
+/* Navigation, editorial pages and keyboard accessibility */
+:where(a,button,input):focus-visible{outline:3px solid rgba(105,157,194,.42);outline-offset:3px}
+.aside-topics li a{display:flex;justify-content:space-between;align-items:center;width:100%;color:inherit}
+.aside-topics li a:hover{color:#477da5}
+.all-news-link{margin-top:25px}
+.news-listing-meta{display:flex;align-items:center;justify-content:space-between;margin:-15px 0 25px;color:#82919a;font-size:10px}
+.news-listing-meta>span:last-child{display:inline-flex;align-items:center;gap:7px}
+.news-listing-meta i{width:6px;height:6px;border-radius:50%;background:#9bb7a9}
+.about-page{min-height:65vh;padding-top:32px;padding-bottom:90px}
+.about-hero{max-width:850px;margin:65px auto 75px;text-align:center}
+.about-symbol{width:92px;height:92px;margin:0 auto 24px;display:grid;place-items:center;border-radius:28px 28px 28px 8px;background:rgba(231,241,247,.72)}
+.about-symbol .brand-symbol-large{width:72px;height:72px}
+.about-hero h1{margin:17px 0 20px;font-family:Manrope,sans-serif;font-size:clamp(34px,5vw,57px);line-height:1.14;letter-spacing:-.06em;font-weight:600}
+.about-hero h1 span{color:#83a9c5;font-family:Georgia,serif;font-style:italic;font-weight:400}
+.about-hero>p{max-width:680px;margin:0 auto;color:#788791;font-size:14px;line-height:1.9}
+.about-principles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.about-principles article{padding:27px 25px;border:1px solid #e4eaea;border-radius:8px;background:rgba(255,255,255,.58)}
+.about-principles article>span{color:#8aa2b1;font-size:8px;font-weight:800;letter-spacing:.15em}
+.about-principles h2{margin:18px 0 10px;font-family:Manrope,sans-serif;font-size:19px;line-height:1.35;letter-spacing:-.035em}
+.about-principles p{margin:0;color:#7d8991;font-size:11px;line-height:1.85}
+.about-note{max-width:700px;margin:65px auto 0;padding:30px;border:1px solid #e2e9e9;border-radius:8px;background:rgba(239,245,247,.65);text-align:center}
+.about-note p{margin:13px auto 22px;color:#74838d;font-size:12px;line-height:1.8}
+@media(max-width:640px){.news-listing-meta{margin-top:-5px}.about-page{padding-bottom:60px}.about-hero{margin:43px auto 45px}.about-hero h1{font-size:35px}.about-hero>p{font-size:12px}.about-principles{grid-template-columns:1fr;gap:12px}.about-principles article{padding:22px}.about-note{margin-top:42px;padding:23px 18px}}
