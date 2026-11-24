@@ -7,7 +7,6 @@ const geminiKey = process.env.GEMINI_API_KEY;
 const primaryModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 const fallbackModels = [
   primaryModel,
-  "gemini-3.7-flash",
   "gemini-3.6-flash",
   "gemini-3.5-flash",
   "gemini-3.5-flash-lite",
@@ -35,7 +34,7 @@ const FEEDS = [
   { name: "OpenAI News", website: "https://openai.com/news/", url: "https://openai.com/news/rss.xml", category: "ai-models" },
   { name: "Hugging Face Blog", website: "https://huggingface.co/blog", url: "https://huggingface.co/blog/feed.xml", category: "tools" },
 ];
-const MAX_AI_ITEMS_PER_RUN = 5;
+const MAX_AI_ITEMS_PER_RUN = 3;
 const AI_DELAY_MS = 1500;
 
 function clean(value = "") {
@@ -103,54 +102,62 @@ RSS description: ${excerpt || "(No description supplied)"}`;
 
   let lastError;
   for (const model of fallbackModels) {
-    try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(geminiKey)}`;
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(35000),
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            responseMimeType: "application/json",
-            maxOutputTokens: 1400,
+    const attemptsForModel = model === primaryModel ? 2 : 1;
+    for (let attempt = 1; attempt <= attemptsForModel; attempt++) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": geminiKey,
           },
-        }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        const message = payload?.error?.message || `Gemini API returned HTTP ${response.status}`;
-        const error = new Error(message);
-        error.status = response.status;
-        throw error;
-      }
-
-      const outputText = payload?.candidates?.[0]?.content?.parts
-        ?.map((part) => part.text || "").join("").trim();
-      if (!outputText) throw new Error("Gemini returned an empty response.");
-
-      const result = parseJsonResponse(outputText);
-      const allowedCategories = new Set(["ai-models", "tools", "research", "technology", "industry"]);
-      if (!allowedCategories.has(result.category)) result.category = "technology";
-      for (const lang of ["uk", "en"]) {
-        const item = result[lang];
-        if (!item || !clean(item.title) || !clean(item.excerpt) || !clean(item.body)) {
-          throw new Error(`Gemini response is missing valid ${lang} editorial fields.`);
+          signal: AbortSignal.timeout(45000),
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.2,
+              responseMimeType: "application/json",
+              maxOutputTokens: 1400,
+            },
+          }),
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const message = payload?.error?.message || `Gemini API returned HTTP ${response.status}`;
+          const error = new Error(message);
+          error.status = response.status;
+          throw error;
         }
-        item.title = clean(item.title).slice(0, 180);
-        item.excerpt = clean(item.excerpt).slice(0, 600);
-        item.body = String(item.body).trim().slice(0, 5000);
+
+        const outputText = payload?.candidates?.[0]?.content?.parts
+          ?.map((part) => part.text || "").join("").trim();
+        if (!outputText) throw new Error("Gemini returned an empty response.");
+
+        const result = parseJsonResponse(outputText);
+        const allowedCategories = new Set(["ai-models", "tools", "research", "technology", "industry"]);
+        if (!allowedCategories.has(result.category)) result.category = "technology";
+        for (const lang of ["uk", "en"]) {
+          const item = result[lang];
+          if (!item || !clean(item.title) || !clean(item.excerpt) || !clean(item.body)) {
+            throw new Error(`Gemini response is missing valid ${lang} editorial fields.`);
+          }
+          item.title = clean(item.title).slice(0, 180);
+          item.excerpt = clean(item.excerpt).slice(0, 600);
+          item.body = String(item.body).trim().slice(0, 5000);
+        }
+        console.log(`Gemini model selected: ${model}`);
+        return { editorial: result, model };
+      } catch (error) {
+        lastError = error;
+        const status = error?.status;
+        const retryable = !status || status === 408 || status === 429 || status >= 500;
+        console.error(`Gemini model ${model}, attempt ${attempt}/${attemptsForModel} failed (HTTP ${status || "network/parse"}): ${error?.message || error}`);
+
+        // Retry only transient failures on the primary model; then try the next model.
+        if (!retryable || attempt >= attemptsForModel) break;
+        await wait(attempt === 1 ? 1500 : 3000);
       }
-      console.log(`Gemini model selected: ${model}`);
-      return { editorial: result, model };
-    } catch (error) {
-      lastError = error;
-      const status = error?.status;
-      const retryable = !status || status === 408 || status === 429 || status >= 500 || status === 404 || status === 400;
-      console.error(`Gemini model ${model} failed (HTTP ${status || "network/parse"}): ${error?.message || error}`);
-      if (!retryable) break;
-      await wait(700);
     }
   }
   throw new Error(`All Gemini models failed. Last error: ${lastError?.message || lastError}`);
