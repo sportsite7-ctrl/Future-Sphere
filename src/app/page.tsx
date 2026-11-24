@@ -40,7 +40,7 @@ export default async function HomePage() {
         <div className="feature-grid">{secondary.map((story) => <NewsCard key={story.slug} story={story} locale={locale} />)}</div>
       </section>
       <section className="latest-section"><div className="page-shell latest-layout">
-        <div className="latest-main"><div className="section-heading"><div><div className="section-kicker">{copy.freshView}</div><h2>{copy.latest}<span>.</span></h2></div>{latest.some((story) => story.isDemo) || lead.isDemo ? <span className="demo-status"><i /> {copy.demoFeed}</span> : <span className="demo-status"><i /> {locale === "en" ? "Published stories" : "Опубліковані матеріали"}</span></div>
+        <div className="latest-main"><div className="section-heading"><div><div className="section-kicker">{copy.freshView}</div><h2>{copy.latest}<span>.</span></h2></div>{latest.some((story) => story.isDemo) || lead.isDemo ? <span className="demo-status"><i /> {copy.demoFeed}</span> : <span className="demo-status"><i /> {locale === "en" ? "Published stories" : "Опубліковані матеріали"}</span>}</div>
           <div className="latest-grid">{latest.map((story) => <NewsCard key={story.slug} story={story} locale={locale} />)}</div>
           <Link href="/news" className="text-link all-news-link">{copy.allMaterials} <span>↗</span></Link>
         </div>
