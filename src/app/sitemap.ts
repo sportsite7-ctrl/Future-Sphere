@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
 import { stories, categories } from "@/lib/stories";
 
-const siteUrl = "https://future-sphere.vercel.app";
-
 export default function sitemap(): MetadataRoute.Sitemap {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  // The production domain is intentionally configured at launch, not guessed during the prototype stage.
+  if (!siteUrl) return [];
+
   return [
     { url: siteUrl, changeFrequency: "daily", priority: 1 },
     { url: `${siteUrl}/news`, changeFrequency: "daily", priority: 0.9 },
