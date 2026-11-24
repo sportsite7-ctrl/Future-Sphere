@@ -4,7 +4,15 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const geminiKey = process.env.GEMINI_API_KEY;
-const geminiModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const primaryModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const fallbackModels = [
+  primaryModel,
+  "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+].filter((model, index, all) => all.indexOf(model) === index);
 
 if (!supabaseUrl || !serviceKey) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY secret.");
@@ -93,42 +101,143 @@ Source URL: ${sourceUrl}
 RSS title: ${title}
 RSS description: ${excerpt || "(No description supplied)"}`;
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:generateContent?key=${encodeURIComponent(geminiKey)}`;
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    signal: AbortSignal.timeout(35000),
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.2,
-        responseMimeType: "application/json",
-        maxOutputTokens: 1400,
-      },
-    }),
-  });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const message = payload?.error?.message || `Gemini API returned HTTP ${response.status}`;
-    throw new Error(message);
-  }
-  const outputText = payload?.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text || "").join("").trim();
-  if (!outputText) throw new Error("Gemini returned an empty response.");
+  let lastError;
+  for (const model of fallbackModels) {
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(geminiKey)}`;
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(35000),
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            responseMimeType: "application/json",
+            maxOutputTokens: 1400,
+          },
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const message = payload?.error?.message || `Gemini API returned HTTP ${response.status}`;
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
+      }
 
-  const result = parseJsonResponse(outputText);
-  const allowedCategories = new Set(["ai-models", "tools", "research", "technology", "industry"]);
-  if (!allowedCategories.has(result.category)) result.category = "technology";
-  for (const lang of ["uk", "en"]) {
-    const item = result[lang];
-    if (!item || !clean(item.title) || !clean(item.excerpt) || !clean(item.body)) {
-      throw new Error(`Gemini response is missing valid ${lang} editorial fields.`);
+      const outputText = payload?.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text || "").join("").trim();
+      if (!outputText) throw new Error("Gemini returned an empty response.");
+
+      const result = parseJsonResponse(outputText);
+      const allowedCategories = new Set(["ai-models", "tools", "research", "technology", "industry"]);
+      if (!allowedCategories.has(result.category)) result.category = "technology";
+      for (const lang of ["uk", "en"]) {
+        const item = result[lang];
+        if (!item || !clean(item.title) || !clean(item.excerpt) || !clean(item.body)) {
+          throw new Error(`Gemini response is missing valid ${lang} editorial fields.`);
+        }
+        item.title = clean(item.title).slice(0, 180);
+        item.excerpt = clean(item.excerpt).slice(0, 600);
+        item.body = String(item.body).trim().slice(0, 5000);
+      }
+      console.log(`Gemini model selected: ${model}`);
+      return { editorial: result, model };
+    } catch (error) {
+      lastError = error;
+      const status = error?.status;
+      const retryable = !status || status === 408 || status === 429 || status >= 500 || status === 404 || status === 400;
+      console.error(`Gemini model ${model} failed (HTTP ${status || "network/parse"}): ${error?.message || error}`);
+      if (!retryable) break;
+      await wait(700);
     }
-    item.title = clean(item.title).slice(0, 180);
-    item.excerpt = clean(item.excerpt).slice(0, 600);
-    item.body = String(item.body).trim().slice(0, 5000);
   }
-  return result;
+  throw new Error(`All Gemini models failed. Last error: ${lastError?.message || lastError}`);
+}
+
+async function findOrCreateSource(feedConfig) {
+  const { data: existing, error: lookupError } = await supabase.from("sources")
+    .select("id")
+    .eq("feed_url", feedConfig.url)
+    .maybeSingle();
+  if (lookupError) throw lookupError;
+
+  const values = {
+    name: feedConfig.name,
+    website_url: feedConfig.website,
+    feed_url: feedConfig.url,
+    source_type: "rss",
+    is_active: true,
+  };
+  if (existing) {
+    const { data, error } = await supabase.from("sources")
+      .update(values).eq("id", existing.id).select("id").single();
+    if (error) throw error;
+    return data;
+  }
+  const { data, error } = await supabase.from("sources")
+    .insert(values).select("id").single();
+  if (error) throw error;
+  return data;
+}
+
+async function findOrCreateArticle({ link, sourceId, categoryId, publishedAt }) {
+  const { data: existing, error: lookupError } = await supabase.from("articles")
+    .select("id,status,category_id")
+    .eq("source_url", link)
+    .maybeSingle();
+  if (lookupError) throw lookupError;
+  if (existing) return existing;
+
+  const { data, error } = await supabase.from("articles")
+    .insert({
+      category_id: categoryId,
+      source_id: sourceId,
+      source_url: link,
+      status: "draft",
+      is_featured: false,
+      published_at: Number.isNaN(Date.parse(publishedAt))
+        ? new Date().toISOString()
+        : new Date(publishedAt).toISOString(),
+    })
+    .select("id,status,category_id").single();
+  if (error) {
+    // If a concurrent run inserted the same source URL, fetch that row instead.
+    const { data: raced, error: racedError } = await supabase.from("articles")
+      .select("id,status,category_id").eq("source_url", link).maybeSingle();
+    if (racedError || !raced) throw error;
+    return raced;
+  }
+  return data;
+}
+
+async function saveTranslations(articleId, editorial) {
+  for (const lang of ["uk", "en"]) {
+    const value = editorial[lang];
+    const slug = makeSlug(value.title, articleId);
+    const row = {
+      article_id: articleId,
+      lang,
+      slug: `${slug}-${lang}`,
+      title: value.title,
+      excerpt: value.excerpt,
+      body: value.body,
+      seo_title: value.title.slice(0, 65),
+      seo_description: value.excerpt.slice(0, 155),
+    };
+    const { data: existing, error: lookupError } = await supabase.from("article_translations")
+      .select("id").eq("article_id", articleId).eq("lang", lang).maybeSingle();
+    if (lookupError) throw lookupError;
+    if (existing) {
+      const { error } = await supabase.from("article_translations")
+        .update(row).eq("id", existing.id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from("article_translations").insert(row);
+      if (error) throw error;
+    }
+  }
 }
 
 const { data: categories, error: categoriesError } = await supabase
@@ -146,16 +255,7 @@ let feedFailures = 0;
 for (const feedConfig of FEEDS) {
   try {
     const feed = await parser.parseURL(feedConfig.url);
-    const { data: source, error: sourceError } = await supabase.from("sources")
-      .upsert({
-        name: feedConfig.name,
-        website_url: feedConfig.website,
-        feed_url: feedConfig.url,
-        source_type: "rss",
-        is_active: true,
-      }, { onConflict: "feed_url" })
-      .select("id").single();
-    if (sourceError) throw sourceError;
+    const source = await findOrCreateSource(feedConfig);
 
     for (const item of (feed.items || []).slice(0, 25)) {
       const originalTitle = clean(item.title);
@@ -167,34 +267,12 @@ for (const feedConfig of FEEDS) {
 
       const publishedAt = item.isoDate || item.pubDate || new Date().toISOString();
       const originalExcerpt = clean(item.contentSnippet || item.summary || item.content || item["content:encoded"] || "").slice(0, 1200);
-
-      const { data: insertedArticle, error: articleError } = await supabase.from("articles")
-        .upsert({
-          category_id: categoryMap.get(feedConfig.category) || null,
-          source_id: source.id,
-          source_url: link,
-          status: "draft",
-          is_featured: false,
-          published_at: Number.isNaN(Date.parse(publishedAt))
-            ? new Date().toISOString()
-            : new Date(publishedAt).toISOString(),
-        }, { onConflict: "source_url", ignoreDuplicates: true })
-        .select("id").maybeSingle();
-      if (articleError) throw articleError;
-
-      let article = insertedArticle;
-      if (!article) {
-        const { data: existingArticle, error: lookupError } = await supabase.from("articles")
-          .select("id,status,category_id")
-          .eq("source_url", link)
-          .maybeSingle();
-        if (lookupError) throw lookupError;
-        article = existingArticle;
-      }
-      if (!article) {
-        skipped++;
-        continue;
-      }
+      const article = await findOrCreateArticle({
+        link,
+        sourceId: source.id,
+        categoryId: categoryMap.get(feedConfig.category) || null,
+        publishedAt,
+      });
 
       const { data: existingTranslations, error: translationsReadError } = await supabase
         .from("article_translations")
@@ -223,40 +301,25 @@ for (const feedConfig of FEEDS) {
       }
 
       try {
-        const editorial = await generateEditorialPackage({
+        const generated = await generateEditorialPackage({
           title: originalTitle,
           excerpt: originalExcerpt,
           sourceUrl: link,
           sourceName: feedConfig.name,
         });
+        const editorial = generated.editorial;
         const categoryId = categoryMap.get(editorial.category) || categoryMap.get(feedConfig.category) || null;
-        const { error: updateArticleError } = await supabase.from("articles")
-          .update({ category_id: categoryId })
-          .eq("id", article.id)
-          .eq("status", "draft");
-        if (updateArticleError) throw updateArticleError;
 
-        const translationRows = ["uk", "en"].map((lang) => {
-          const value = editorial[lang];
-          const slug = makeSlug(value.title, article.id);
-          return {
-            article_id: article.id,
-            lang,
-            slug: `${slug}-${lang}`,
-            title: value.title,
-            excerpt: value.excerpt,
-            body: value.body,
-            seo_title: value.title.slice(0, 65),
-            seo_description: value.excerpt.slice(0, 155),
-          };
-        });
-        const { error: translationError } = await supabase.from("article_translations")
-          .upsert(translationRows, { onConflict: "article_id,lang" });
-        if (translationError) throw translationError;
+        if (article.status === "draft") {
+          const { error: updateArticleError } = await supabase.from("articles")
+            .update({ category_id: categoryId }).eq("id", article.id).eq("status", "draft");
+          if (updateArticleError) throw updateArticleError;
+        }
+        await saveTranslations(article.id, editorial);
 
         aiProcessed++;
         imported++;
-        console.log(`Gemini processed: ${originalTitle.slice(0, 100)}`);
+        console.log(`Gemini processed with ${generated.model}: ${originalTitle.slice(0, 100)}`);
         await wait(AI_DELAY_MS);
       } catch (error) {
         failed++;
@@ -270,7 +333,7 @@ for (const feedConfig of FEEDS) {
   }
 }
 
-const summary = { imported, skipped, failed, feedFailures, aiProcessed, aiAlreadyDone, model: geminiModel };
+const summary = { imported, skipped, failed, feedFailures, aiProcessed, aiAlreadyDone, modelOrder: fallbackModels };
 console.log(JSON.stringify(summary));
 if (feedFailures === FEEDS.length) process.exit(1);
 if (aiProcessed === 0 && failed > 0) process.exit(1);
