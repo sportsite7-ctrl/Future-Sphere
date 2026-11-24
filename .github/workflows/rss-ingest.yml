@@ -2,7 +2,7 @@ name: Future Sphere RSS ingestion
 
 on:
   schedule:
-    - cron: "17 */3 * * *"
+    - cron: "*/10 * * * *"
   workflow_dispatch:
   push:
     branches:
@@ -21,17 +21,18 @@ concurrency:
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
+          package-manager-cache: false
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Import and enrich RSS items with Gemini
+      - name: Import, translate and publish RSS items
         run: npm run rss:ingest
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
