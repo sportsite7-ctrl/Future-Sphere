@@ -2,6 +2,8 @@ export type Story = {
   slug: string; category: string; categorySlug: string; title: string;
   excerpt: string; date: string; readTime: string; image: string;
   imageAlt: string; body: string[];
+  isDemo?: boolean; isFeatured?: boolean; sourceUrl?: string;
+  imageCredit?: string; seoTitle?: string; seoDescription?: string;
 };
 
 export const stories: Story[] = [
