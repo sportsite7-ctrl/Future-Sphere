@@ -8,7 +8,6 @@ const primaryModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 const fallbackModels = [
   primaryModel,
   "gemini-3.6-flash",
-  "gemini-3.5-flash",
   "gemini-3.5-flash-lite",
   "gemini-3.1-flash-lite",
 ].filter((model, index, all) => all.indexOf(model) === index);
@@ -34,8 +33,10 @@ const FEEDS = [
   { name: "OpenAI News", website: "https://openai.com/news/", url: "https://openai.com/news/rss.xml", category: "ai-models" },
   { name: "Hugging Face Blog", website: "https://huggingface.co/blog", url: "https://huggingface.co/blog/feed.xml", category: "tools" },
 ];
-const MAX_AI_ITEMS_PER_RUN = 3;
-const AI_DELAY_MS = 1500;
+const MAX_AI_ITEMS_PER_RUN = 1;
+const AI_DELAY_MS = 1000;
+let aiCircuitOpen = false;
+const modelSuccesses = new Map();
 
 function clean(value = "") {
   return String(value)
@@ -146,6 +147,7 @@ RSS description: ${excerpt || "(No description supplied)"}`;
           item.excerpt = clean(item.excerpt).slice(0, 600);
           item.body = String(item.body).trim().slice(0, 5000);
         }
+        modelSuccesses.set(model, (modelSuccesses.get(model) || 0) + 1);
         console.log(`Gemini model selected: ${model}`);
         return { editorial: result, model };
       } catch (error) {
@@ -160,7 +162,8 @@ RSS description: ${excerpt || "(No description supplied)"}`;
       }
     }
   }
-  throw new Error(`All Gemini models failed. Last error: ${lastError?.message || lastError}`);
+  aiCircuitOpen = true;
+  throw new Error(`All Gemini models failed; AI circuit opened for this run. Last error: ${lastError?.message || lastError}`);
 }
 
 async function findOrCreateSource(feedConfig) {
@@ -297,13 +300,25 @@ for (const feedConfig of FEEDS) {
           && body.length > 40;
       });
       if (hasEditorialContent) {
+        if (article.status === "draft") {
+          const { error: publishExistingError } = await supabase.from("articles")
+            .update({ status: "published" }).eq("id", article.id).eq("status", "draft");
+          if (publishExistingError) throw publishExistingError;
+          imported++;
+        } else {
+          skipped++;
+        }
         aiAlreadyDone++;
-        skipped++;
         continue;
       }
 
-      if (aiProcessed >= MAX_AI_ITEMS_PER_RUN) {
+      if (aiProcessed >= MAX_AI_ITEMS_PER_RUN || aiCircuitOpen) {
         skipped++;
+        continue;
+      }
+      if (originalExcerpt.length < 35) {
+        skipped++;
+        console.log(`Skipped item with insufficient RSS description: ${originalTitle.slice(0, 100)}`);
         continue;
       }
 
@@ -324,6 +339,14 @@ for (const feedConfig of FEEDS) {
         }
         await saveTranslations(article.id, editorial);
 
+        // Publish only after both language versions have been saved successfully.
+        if (article.status === "draft") {
+          const { error: publishError } = await supabase.from("articles")
+            .update({ category_id: categoryId, status: "published" })
+            .eq("id", article.id).eq("status", "draft");
+          if (publishError) throw publishError;
+        }
+
         aiProcessed++;
         imported++;
         console.log(`Gemini processed with ${generated.model}: ${originalTitle.slice(0, 100)}`);
@@ -331,7 +354,9 @@ for (const feedConfig of FEEDS) {
       } catch (error) {
         failed++;
         console.error(`AI processing failed for ${link}:`, error?.message || error);
+        if (aiCircuitOpen) break;
       }
+      if (aiProcessed >= MAX_AI_ITEMS_PER_RUN || aiCircuitOpen) break;
     }
     console.log(`RSS feed checked: ${feedConfig.name} (${feed.items?.length || 0} entries)`);
   } catch (error) {
@@ -340,7 +365,28 @@ for (const feedConfig of FEEDS) {
   }
 }
 
-const summary = { imported, skipped, failed, feedFailures, aiProcessed, aiAlreadyDone, modelOrder: fallbackModels };
-console.log(JSON.stringify(summary));
+const summary = {
+  imported, skipped, failed, feedFailures, aiProcessed, aiAlreadyDone, aiCircuitOpen,
+  modelSuccesses: Object.fromEntries(modelSuccesses), modelOrder: fallbackModels,
+};
+console.log(JSON.stringify(summary, null, 2));
+const markdown = [
+  "## Future Sphere — RSS automation", "",
+  `- **Published this run:** ${imported}`,
+  `- **Already processed:** ${aiAlreadyDone}`,
+  `- **Skipped:** ${skipped}`,
+  `- **Processing errors:** ${failed}`,
+  `- **Feed errors:** ${feedFailures}`,
+  `- **Gemini circuit breaker:** ${aiCircuitOpen ? "opened; further AI calls stopped" : "not triggered"}`,
+  `- **Successful Gemini models:** ${Object.keys(Object.fromEntries(modelSuccesses)).join(", ") || "none"}`,
+  "",
+  "_Only items with both language versions saved successfully are published. Every article retains its original source URL._", "",
+].join("\n");
+if (process.env.GITHUB_STEP_SUMMARY) {
+  const { appendFile } = await import("node:fs/promises");
+  await appendFile(process.env.GITHUB_STEP_SUMMARY, markdown);
+}
+if (failed > 0 || feedFailures > 0 || aiCircuitOpen) {
+  console.log("::warning::RSS automation completed with warnings. See the step summary.");
+}
 if (feedFailures === FEEDS.length) process.exit(1);
-if (aiProcessed === 0 && failed > 0) process.exit(1);
