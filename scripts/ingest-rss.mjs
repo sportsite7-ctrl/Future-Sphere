@@ -33,7 +33,8 @@ const FEEDS = [
   { name: "OpenAI News", website: "https://openai.com/news/", url: "https://openai.com/news/rss.xml", category: "ai-models" },
   { name: "Hugging Face Blog", website: "https://huggingface.co/blog", url: "https://huggingface.co/blog/feed.xml", category: "tools" },
 ];
-const MAX_AI_ITEMS_PER_RUN = 3;
+const configuredMax = Number.parseInt(process.env.MAX_AI_ITEMS_PER_RUN || "3", 10);
+const MAX_AI_ITEMS_PER_RUN = Number.isFinite(configuredMax) ? Math.min(15, Math.max(1, configuredMax)) : 3;
 const AI_DELAY_MS = 1000;
 let aiCircuitOpen = false;
 const modelSuccesses = new Map();
