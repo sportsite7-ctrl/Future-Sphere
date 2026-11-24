@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BrandSymbol } from "@/components/brand-symbol";
-import { getLocale, t } from "@/lib/i18n";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export default async function AboutPage() {
   const locale = await getLocale();
