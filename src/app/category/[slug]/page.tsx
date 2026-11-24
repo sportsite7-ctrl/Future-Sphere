@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NewsCard } from "@/components/news-card";
 import { categories, stories } from "@/lib/stories";
-import { categoryText, getLocale, t, localizeStory } from "@/lib/i18n";
+import { getLocale } from "@/lib/locale";
+import { categoryText, t, localizeStory } from "@/lib/i18n";
 
 export async function generateStaticParams() { return categories.map((item) => ({ slug: item.slug })); }
 
