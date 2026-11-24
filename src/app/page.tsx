@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NewsCard } from "@/components/news-card";
+import { BrandSymbol } from "@/components/brand-symbol";
 import { categories, stories } from "@/lib/stories";
 
 export default function HomePage() {
@@ -43,7 +44,7 @@ export default function HomePage() {
         </aside>
       </div></section>
 
-      <section className="manifesto page-shell"><div className="manifesto-mark">FS<span>.</span></div><div><div className="section-kicker">FUTURE SPHERE</div><h2>Зрозуміти технології.<br /><span>Побачити можливості.</span></h2></div><p>Ми створюємо простір, де складні технології стають зрозумілими, а важливі відкриття не губляться серед інформаційного потоку.</p></section>
+      <section className="manifesto page-shell"><div className="manifesto-mark"><BrandSymbol large /></div><div><div className="section-kicker">FUTURE SPHERE</div><h2>Зрозуміти технології.<br /><span>Побачити можливості.</span></h2></div><p>Ми створюємо простір, де складні технології стають зрозумілими, а важливі відкриття не губляться серед інформаційного потоку.</p></section>
     </>
   );
 }

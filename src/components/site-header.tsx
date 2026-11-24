@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { BrandSymbol } from "@/components/brand-symbol";
 
 const navItems = [
   { label: "Новини", href: "/" },
@@ -16,7 +17,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="header-inner">
         <Link href="/" className="brand" aria-label="Future Sphere — головна">
-          <span className="brand-mark"><span>F</span><i /></span>
+          <BrandSymbol />
           <span className="brand-wordmark">future<span>sphere</span></span>
         </Link>
         <nav className={menuOpen ? "main-nav is-open" : "main-nav"} aria-label="Головна навігація">
