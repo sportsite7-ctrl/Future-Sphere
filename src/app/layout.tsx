@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { getLocale, t } from "@/lib/i18n";
+import { getLocale } from "@/lib/locale";
+import { t } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: { default: "Future Sphere — AI news and insights", template: "%s | Future Sphere" },
