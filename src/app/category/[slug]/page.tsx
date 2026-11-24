@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { NewsCard } from "@/components/news-card";
 import { getCategories, getStories } from "@/lib/content";
 import { getLocale } from "@/lib/locale";
-import { categoryText, t, localizeStory } from "@/lib/i18n";
+import { t, localizeStory } from "@/lib/i18n";
 
 export async function generateStaticParams() { return []; }
 
