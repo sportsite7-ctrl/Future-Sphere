@@ -58,3 +58,10 @@ body::before{content:"";position:fixed;inset:-18%;z-index:-1;pointer-events:none
 .about-note{max-width:700px;margin:65px auto 0;padding:30px;border:1px solid #e2e9e9;border-radius:8px;background:rgba(239,245,247,.65);text-align:center}
 .about-note p{margin:13px auto 22px;color:#74838d;font-size:12px;line-height:1.8}
 @media(max-width:640px){.news-listing-meta{margin-top:-5px}.about-page{padding-bottom:60px}.about-hero{margin:43px auto 45px}.about-hero h1{font-size:35px}.about-hero>p{font-size:12px}.about-principles{grid-template-columns:1fr;gap:12px}.about-principles article{padding:22px}.about-note{margin-top:42px;padding:23px 18px}}
+
+/* Compact bilingual language switch */
+.language-switch{display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid #e1e8e9;border-radius:22px;background:rgba(255,255,255,.82)}
+.language-switch button{min-width:31px;height:25px;padding:0 7px;border:0;border-radius:16px;background:transparent;color:#82919a;font:700 9px/1 inherit;letter-spacing:.06em;cursor:pointer;transition:background .18s,color .18s,box-shadow .18s}
+.language-switch button:hover{color:#456e8b}
+.language-switch button.is-active{background:#e8f1f6;color:#426f90;box-shadow:inset 0 0 0 1px #d9e7ef}
+@media(max-width:640px){.language-switch{gap:1px;padding:2px}.language-switch button{min-width:28px;height:24px;padding:0 6px;font-size:8px}}
