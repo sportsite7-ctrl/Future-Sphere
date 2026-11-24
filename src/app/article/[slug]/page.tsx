@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NewsCard } from "@/components/news-card";
+import { NewsImage } from "@/components/news-image";
 import { stories } from "@/lib/stories";
 import { getLocale } from "@/lib/locale";
 import { t, localizeStory } from "@/lib/i18n";
@@ -30,7 +31,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       <header className="article-header"><span className="article-category">{story.category} · {copy.demoArticle}</span><h1>{story.title}</h1><p className="article-deck">{story.excerpt}</p>
         <div className="article-byline"><span className="byline-avatar">FS</span><span><b>{copy.editor}</b><small>{story.date} · {story.readTime}</small></span></div>
       </header>
-      <div className="article-cover" style={{ backgroundImage: `url("${story.image}")` }} role="img" aria-label={story.imageAlt} />
+      <NewsImage src={story.image} alt={story.imageAlt} className="article-cover" priority />
       <div className="article-body-wrap"><div className="article-body">
         <div className="article-demo-note">{copy.articleDemo}</div>
         {story.body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
