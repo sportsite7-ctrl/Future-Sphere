@@ -2,13 +2,14 @@ import Link from "next/link";
 import type { Story } from "@/lib/stories";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
+import { NewsImage } from "@/components/news-image";
 
 export function NewsCard({ story, locale = "uk" }: { story: Story; locale?: Locale }) {
   const copy = t(locale);
   return (
     <article className="news-card">
       <Link href={`/article/${story.slug}`} className="card-image-link" aria-label={story.title}>
-        <div className="card-image" style={{ backgroundImage: `url("${story.image}")` }}><span className="image-category">{story.category}</span></div>
+        <div className="card-image-wrap"><NewsImage src={story.image} alt={story.imageAlt} className="card-image" /><span className="image-category">{story.category}</span></div>
       </Link>
       <div className="card-copy">
         <div className="card-meta"><span>{story.date}</span><i /> <span>{story.readTime}</span></div>
