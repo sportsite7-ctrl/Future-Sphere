@@ -6,15 +6,21 @@ import { getCategories, getStories } from "@/lib/content";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
 import { localizeStory } from "@/lib/i18n";
+import { Pagination } from "@/components/pagination";
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const locale = await getLocale();
   const copy = t(locale);
-  const [stories, categories] = await Promise.all([getStories(locale), getCategories(locale)]);
+  const [{ page: pageParam }, stories, categories] = await Promise.all([searchParams, getStories(locale), getCategories(locale)]);
   const orderedStories = [...stories].sort((a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)));
-  const lead = localizeStory(orderedStories[0], locale);
-  const secondary = orderedStories.slice(1, 3).map((story) => localizeStory(story, locale));
-  const latest = orderedStories.slice(3).map((story) => localizeStory(story, locale));
+  const pageSize = 5;
+  const totalPages = Math.max(1, Math.ceil(orderedStories.length / pageSize));
+  const requestedPage = Math.max(1, Number.parseInt(pageParam || "1", 10) || 1);
+  const page = Math.min(requestedPage, totalPages);
+  const pageStories = orderedStories.slice((page - 1) * pageSize, page * pageSize);
+  const lead = localizeStory(pageStories[0] || orderedStories[0], locale);
+  const secondary = pageStories.slice(1, 3).map((story) => localizeStory(story, locale));
+  const latest = pageStories.slice(3, 5).map((story) => localizeStory(story, locale));
   return (
     <>
       <section className="hero-section page-shell">
@@ -43,6 +49,7 @@ export default async function HomePage() {
         <div className="latest-main"><div className="section-heading"><div><div className="section-kicker">{copy.freshView}</div><h2>{copy.latest}<span>.</span></h2></div>{latest.some((story) => story.isDemo) || lead.isDemo ? <span className="demo-status"><i /> {copy.demoFeed}</span> : <span className="demo-status"><i /> {locale === "en" ? "Published stories" : "Опубліковані матеріали"}</span>}</div>
           <div className="latest-grid">{latest.map((story) => <NewsCard key={story.slug} story={story} locale={locale} />)}</div>
           <Link href="/news" className="text-link all-news-link">{copy.allMaterials} <span>↗</span></Link>
+          <Pagination page={page} totalPages={totalPages} basePath="/" locale={locale} />
         </div>
         <aside className="editorial-aside">
           <div className="aside-card aside-note"><span className="aside-number">01 / {locale === "en" ? "PRINCIPLE" : "ПРИНЦИП"}</span><div className="aside-orbit"><span /><i /><b /></div><h3>{copy.lessNoise}<br />{copy.moreUnderstanding}</h3><p>{copy.editorialText}</p><Link href="/about" className="text-link">{copy.editorialApproach} <span>↗</span></Link></div>
