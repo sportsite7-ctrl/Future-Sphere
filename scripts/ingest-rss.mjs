@@ -61,16 +61,19 @@ function extractImage(item) {
   const mediaContent = item["media:content"];
   const mediaThumbnail = item["media:thumbnail"];
   const candidates = [
-    item.enclosure?.url,
-    item.image?.url,
-    typeof item.image === "string" ? item.image : null,
-    item.itunes?.image,
-    mediaContent?.url,
-    mediaContent?.$?.url,
-    mediaThumbnail?.url,
-    mediaThumbnail?.$?.url,
+    { url: item.enclosure?.url, type: item.enclosure?.type },
+    { url: item.image?.url || (typeof item.image === "string" ? item.image : null), type: "image" },
+    { url: item.itunes?.image?.href || item.itunes?.image, type: "image" },
+    { url: mediaContent?.url || mediaContent?.$?.url, type: mediaContent?.type || mediaContent?.$?.type || mediaContent?.medium },
+    { url: mediaThumbnail?.url || mediaThumbnail?.$?.url, type: "image" },
   ];
-  return candidates.find((value) => typeof value === "string" && validHttpUrl(value)) || null;
+  const match = candidates.find(({ url, type }) =>
+    typeof url === "string" &&
+    validHttpUrl(url) &&
+    (String(type || "").toLowerCase().startsWith("image") ||
+      (!type && /\\.(avif|gif|jpe?g|png|webp)(?:[?#]|$)/i.test(url)))
+  );
+  return match?.url || null;
 }
 function makeSlug(value, suffix) {
   const slug = clean(value).toLowerCase().normalize("NFKD")
