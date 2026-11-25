@@ -57,6 +57,21 @@ function validHttpUrl(value) {
     return false;
   }
 }
+function extractImage(item) {
+  const mediaContent = item["media:content"];
+  const mediaThumbnail = item["media:thumbnail"];
+  const candidates = [
+    item.enclosure?.url,
+    item.image?.url,
+    typeof item.image === "string" ? item.image : null,
+    item.itunes?.image,
+    mediaContent?.url,
+    mediaContent?.$?.url,
+    mediaThumbnail?.url,
+    mediaThumbnail?.$?.url,
+  ];
+  return candidates.find((value) => typeof value === "string" && validHttpUrl(value)) || null;
+}
 function makeSlug(value, suffix) {
   const slug = clean(value).toLowerCase().normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -91,7 +106,7 @@ Return valid JSON only, with exactly this structure:
 Rules:
 - Titles: informative, neutral, no clickbait, ideally under 100 characters.
 - Excerpts: one or two sentences, about 20-45 words.
-- Body: 2-3 short paragraphs, about 70-130 words total, using only the supplied facts. If the description is too thin, body may be shorter.
+- Body: 3 short paragraphs, about 110-170 words total when the supplied description supports it. If the description is too thin, keep the article shorter rather than padding it.
 - The body must clearly frame the item as a report based on the source's published announcement/post, not as independently verified fact.
 - Do not include unsupported dates, prices, benchmarks, availability claims, or feature details.
 - Category must be exactly one of the five allowed slugs.
@@ -195,19 +210,34 @@ async function findOrCreateSource(feedConfig) {
   return data;
 }
 
-async function findOrCreateArticle({ link, sourceId, categoryId, publishedAt }) {
+async function findOrCreateArticle({ link, sourceId, categoryId, publishedAt, imageUrl, imageAlt, sourceName }) {
   const { data: existing, error: lookupError } = await supabase.from("articles")
-    .select("id,status,category_id")
+    .select("id,status,category_id,image_url")
     .eq("source_url", link)
     .maybeSingle();
   if (lookupError) throw lookupError;
-  if (existing) return existing;
+  if (existing) {
+    if (imageUrl && !existing.image_url) {
+      const { error: imageUpdateError } = await supabase.from("articles").update({
+        image_url: imageUrl,
+        image_alt: imageAlt,
+        image_credit: sourceName,
+        image_source_url: link,
+      }).eq("id", existing.id);
+      if (imageUpdateError) throw imageUpdateError;
+    }
+    return existing;
+  }
 
   const { data, error } = await supabase.from("articles")
     .insert({
       category_id: categoryId,
       source_id: sourceId,
       source_url: link,
+      image_url: imageUrl,
+      image_alt: imageAlt,
+      image_credit: imageUrl ? sourceName : null,
+      image_source_url: imageUrl ? link : null,
       status: "draft",
       is_featured: false,
       published_at: Number.isNaN(Date.parse(publishedAt))
@@ -280,11 +310,15 @@ for (const feedConfig of FEEDS) {
 
       const publishedAt = item.isoDate || item.pubDate || new Date().toISOString();
       const originalExcerpt = clean(item.contentSnippet || item.summary || item.content || item["content:encoded"] || "").slice(0, 1200);
+      const rssImage = extractImage(item);
       const article = await findOrCreateArticle({
         link,
         sourceId: source.id,
         categoryId: categoryMap.get(feedConfig.category) || null,
         publishedAt,
+        imageUrl: rssImage,
+        imageAlt: rssImage ? originalTitle : null,
+        sourceName: feedConfig.name,
       });
 
       const { data: existingTranslations, error: translationsReadError } = await supabase
