@@ -18,7 +18,18 @@ const editorialImages = {
   tools: { url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1500&q=85", alt: "Laptop workstation representing digital tools" },
   research: { url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1500&q=85", alt: "Global technology and scientific research" },
   industry: { url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1500&q=85", alt: "Modern technology industry and infrastructure" },
+  robotics: { url: "https://images.unsplash.com/photo-1535378620166-273708d44e4c?auto=format&fit=crop&w=1500&q=85", alt: "Robotics and automation technology" },
+  data: { url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1500&q=85", alt: "Data center infrastructure" },
+  coding: { url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1500&q=85", alt: "Technology hardware and circuit board" },
 };
+
+const genericImageIds = ["photo-1677442136019-21780ecad995"];
+
+function stableChoice<T>(items: T[], seed: string): T {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  return items[Math.abs(hash) % items.length];
+}
 
 function fallbackForArticle(sourceUrl: string | null, title: string, categorySlug: string) {
   const text = `${sourceUrl || ""} ${title}`.toLowerCase();
@@ -26,11 +37,19 @@ function fallbackForArticle(sourceUrl: string | null, title: string, categorySlu
   if (/google|gemini|deepmind/.test(text)) return editorialImages.google;
   if (/anthropic|claude/.test(text)) return editorialImages.anthropic;
   if (/huggingface|hugging face/.test(text)) return editorialImages.huggingface;
+  if (/robot|robotics|automation/.test(text)) return editorialImages.robotics;
+  if (/chip|gpu|processor|hardware|semiconductor/.test(text)) return editorialImages.coding;
+  if (/data cent(?:er|re)|cloud infrastructure|server/.test(text)) return editorialImages.data;
+  if (/code|coding|developer|programming|software/.test(text)) return editorialImages.tools;
   if (categorySlug === "tools") return editorialImages.tools;
   if (categorySlug === "research") return editorialImages.research;
   if (categorySlug === "industry") return editorialImages.industry;
-  if (categorySlug === "technology") return editorialImages.research;
-  return { url: fallbackImage, alt: "Abstract artificial intelligence visualization" };
+  if (categorySlug === "technology") return stableChoice([editorialImages.research, editorialImages.industry, editorialImages.data, editorialImages.robotics], text);
+  return stableChoice([editorialImages.research, editorialImages.robotics, editorialImages.data, editorialImages.coding], text);
+}
+
+function isGenericPlaceholder(url: string | null | undefined) {
+  return Boolean(url && genericImageIds.some((id) => url.includes(id)));
 }
 
 export async function getCategories(locale: Locale): Promise<ContentCategory[]> {
@@ -104,7 +123,9 @@ export async function getStories(locale: Locale): Promise<Story[]> {
               day: "numeric", month: "long", year: "numeric"
             }).format(new Date(article.published_at))
           : "";
-        const editorialImage = article.image_url
+        // Older imported rows may already contain the original one-image placeholder.
+        // Treat it like a missing image so each story receives its own topic/company visual.
+        const editorialImage = article.image_url && !isGenericPlaceholder(article.image_url)
           ? { url: article.image_url, alt: article.image_alt || translation.title }
           : fallbackForArticle(article.source_url, translation.title, categorySlug);
         result.push({
