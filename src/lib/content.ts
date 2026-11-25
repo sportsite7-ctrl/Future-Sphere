@@ -104,7 +104,10 @@ export async function getStories(locale: Locale): Promise<Story[]> {
               day: "numeric", month: "long", year: "numeric"
             }).format(new Date(article.published_at))
           : "";
-        const editorialImage = article.image_url\n          ? { url: article.image_url, alt: article.image_alt || translation.title }\n          : fallbackForArticle(article.source_url, translation.title, categorySlug);\n        result.push({
+        const editorialImage = article.image_url
+          ? { url: article.image_url, alt: article.image_alt || translation.title }
+          : fallbackForArticle(article.source_url, translation.title, categorySlug);
+        result.push({
           slug: translation.slug,
           category: categoryName,
           categorySlug,
@@ -114,8 +117,8 @@ export async function getStories(locale: Locale): Promise<Story[]> {
           readTime: locale === "en"
             ? `${Math.max(1, Math.ceil(wordCount / 200))} min read`
             : `${Math.max(1, Math.ceil(wordCount / 200))} хв читання`,
-          image: article.image_url || fallbackImage,
-          imageAlt: article.image_alt || translation.title,
+          image: editorialImage.url,
+          imageAlt: editorialImage.alt,
           body: paragraphs.length ? paragraphs : (bodyText ? [bodyText] : []),
           isDemo: false,
           sourceUrl: article.source_url ?? undefined,
