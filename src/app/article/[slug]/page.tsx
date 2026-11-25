@@ -33,12 +33,23 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <div className="article-byline"><span className="byline-avatar">FS</span><span><b>{copy.editor}</b><small>{story.date} · {story.readTime}</small></span></div>
       </header>
       <NewsImage src={story.image} alt={story.imageAlt} className="article-cover" priority />
-      <div className="article-body-wrap"><div className="article-body">
+      <div className="article-layout"><div className="article-body-wrap"><div className="article-body">
         {story.isDemo && <div className="article-demo-note">{copy.articleDemo}</div>}
         {story.body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
         {story.sourceUrl ? <div className="article-source-note"><b>{copy.sourceNote}</b><a href={story.sourceUrl} target="_blank" rel="noreferrer">{locale === "en" ? "Open original source" : "Відкрити першоджерело"} ↗</a>{story.imageCredit && <span>{story.imageCredit}</span>}</div> : <div className="article-source-note"><b>{copy.sourceNote}</b><span>{copy.sourceText}</span></div>}
         <Link href="/" className="back-link">{copy.backHome}</Link>
       </div></div>
+      <aside className="article-sidebar">
+        <div className="article-sidebar-card">
+          <div className="section-kicker">{locale === "en" ? "ARTICLE DETAILS" : "ПРО МАТЕРІАЛ"}</div>
+          <h3>{locale === "en" ? "At a glance" : "Коротко про матеріал"}</h3>
+          <div className="article-sidebar-row"><span>{locale === "en" ? "Topic" : "Тема"}</span><b>{story.category}</b></div>
+          <div className="article-sidebar-row"><span>{locale === "en" ? "Published" : "Опубліковано"}</span><b>{story.date}</b></div>
+          <div className="article-sidebar-row"><span>{locale === "en" ? "Reading time" : "Час читання"}</span><b>{story.readTime}</b></div>
+          <div className="article-sidebar-note">{locale === "en" ? "This briefing is based on the linked original publication. Follow the source for the full announcement and context." : "Цей матеріал підготовлено на основі першоджерела. Перейдіть до оригінальної публікації, щоб ознайомитися з повним контекстом."}</div>
+          {story.sourceUrl && <a className="article-sidebar-source" href={story.sourceUrl} target="_blank" rel="noreferrer">{locale === "en" ? "Open original source" : "Відкрити першоджерело"} <span>↗</span></a>}
+        </div>
+      </aside></div>
       <section className="related-section"><div className="section-heading"><div><div className="section-kicker">{copy.continueReading}</div><h2>{copy.moreFrom}<span>.</span></h2></div></div><div className="feature-grid">{related.map((item) => <NewsCard key={item.slug} story={item} locale={locale} />)}</div></section>
     </article>
   );
