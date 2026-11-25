@@ -155,7 +155,8 @@ RSS description: ${excerpt || "(No description supplied)"}`;
       } catch (error) {
         lastError = error;
         const status = error?.status;
-        const retryable = !status || status === 408 || status === 429 || status >= 500;
+        const quotaLimited = status === 429 && /quota exceeded|free_tier_requests|requests per day limit/i.test(String(error?.message || ""));
+        const retryable = !quotaLimited && (!status || status === 408 || status === 429 || status >= 500);
         console.error(`Gemini model ${model}, attempt ${attempt}/${attemptsForModel} failed (HTTP ${status || "network/parse"}): ${error?.message || error}`);
 
         // Retry only transient failures on the primary model; then try the next model.
@@ -227,11 +228,11 @@ async function findOrCreateArticle({ link, sourceId, categoryId, publishedAt }) 
 async function saveTranslations(articleId, editorial) {
   for (const lang of ["uk", "en"]) {
     const value = editorial[lang];
-    const slug = makeSlug(value.title, articleId);
+    const baseSlug = makeSlug(value.title, articleId);
     const row = {
       article_id: articleId,
       lang,
-      slug: `${slug}-${lang}`,
+      slug: `${baseSlug}-${String(articleId).slice(0, 8)}-${lang}`,
       title: value.title,
       excerpt: value.excerpt,
       body: value.body,
