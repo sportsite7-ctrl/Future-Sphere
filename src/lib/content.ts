@@ -10,6 +10,29 @@ export type ContentCategory = {
 
 const fallbackImage = "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1500&q=85";
 
+const editorialImages = {
+  openai: { url: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1500&q=85", alt: "Abstract artificial intelligence visualization" },
+  google: { url: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1500&q=85", alt: "Scientific visualization representing AI research" },
+  anthropic: { url: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1500&q=85", alt: "Robotics and intelligent technology" },
+  huggingface: { url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1500&q=85", alt: "Computer chips and AI hardware" },
+  tools: { url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1500&q=85", alt: "Laptop workstation representing digital tools" },
+  research: { url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1500&q=85", alt: "Global technology and scientific research" },
+  industry: { url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1500&q=85", alt: "Modern technology industry and infrastructure" },
+};
+
+function fallbackForArticle(sourceUrl: string | null, title: string, categorySlug: string) {
+  const text = `${sourceUrl || ""} ${title}`.toLowerCase();
+  if (/openai|chatgpt/.test(text)) return editorialImages.openai;
+  if (/google|gemini|deepmind/.test(text)) return editorialImages.google;
+  if (/anthropic|claude/.test(text)) return editorialImages.anthropic;
+  if (/huggingface|hugging face/.test(text)) return editorialImages.huggingface;
+  if (categorySlug === "tools") return editorialImages.tools;
+  if (categorySlug === "research") return editorialImages.research;
+  if (categorySlug === "industry") return editorialImages.industry;
+  if (categorySlug === "technology") return editorialImages.research;
+  return { url: fallbackImage, alt: "Abstract artificial intelligence visualization" };
+}
+
 export async function getCategories(locale: Locale): Promise<ContentCategory[]> {
   try {
     const { data, error } = await supabase
@@ -81,7 +104,7 @@ export async function getStories(locale: Locale): Promise<Story[]> {
               day: "numeric", month: "long", year: "numeric"
             }).format(new Date(article.published_at))
           : "";
-        result.push({
+        const editorialImage = article.image_url\n          ? { url: article.image_url, alt: article.image_alt || translation.title }\n          : fallbackForArticle(article.source_url, translation.title, categorySlug);\n        result.push({
           slug: translation.slug,
           category: categoryName,
           categorySlug,
