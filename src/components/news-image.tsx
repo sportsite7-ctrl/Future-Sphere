@@ -6,7 +6,7 @@ type NewsImageProps = {
 };
 
 const fallbackImage =
-  "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1800&q=90";
+  "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1800&q=90";
 
 function getEditorialImageUrl(src?: string | null) {
   const value = src?.trim();
