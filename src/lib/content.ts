@@ -8,89 +8,59 @@ export type ContentCategory = {
   description: string;
 };
 
-const fallbackImage = "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1500&q=85";
-
 type EditorialImage = { url: string; alt: string };
 
-const editorialImageSets: Record<string, EditorialImage[]> = {
-  openai: [
-    { url: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1500&q=85", alt: "Abstract artificial intelligence concept" },
-    { url: "https://images.unsplash.com/photo-1535378620166-273708d44e4c?auto=format&fit=crop&w=1500&q=85", alt: "Robotics and intelligent automation" },
-    { url: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1500&q=85", alt: "Digital neural network visualization" },
-    { url: "https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=1500&q=85", alt: "Artificial intelligence technology concept" },
-  ],
-  google: [
-    { url: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1500&q=85", alt: "Scientific visualization and AI research" },
-    { url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1500&q=85", alt: "Global technology network" },
-    { url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1500&q=85", alt: "Advanced computing hardware" },
-  ],
-  anthropic: [
-    { url: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1500&q=85", alt: "Intelligent robotics technology" },
-    { url: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1500&q=85", alt: "Artificial intelligence neural network" },
-    { url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1500&q=85", alt: "Computing infrastructure" },
-  ],
-  huggingface: [
-    { url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1500&q=85", alt: "Computer hardware and circuit board" },
-    { url: "https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=1500&q=85", alt: "Artificial intelligence technology" },
-    { url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1500&q=85", alt: "Software development workstation" },
-  ],
-  tools: [
-    { url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1500&q=85", alt: "Software tools workstation" },
-    { url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1500&q=85", alt: "Digital collaboration and technology" },
-    { url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1500&q=85", alt: "Technology team workspace" },
-  ],
-  research: [
-    { url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1500&q=85", alt: "Global scientific technology network" },
-    { url: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1500&q=85", alt: "Scientific research visualization" },
-    { url: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1500&q=85", alt: "Scientific laboratory research" },
-  ],
-  industry: [
-    { url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1500&q=85", alt: "Modern technology industry" },
-    { url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1500&q=85", alt: "Cloud and data center infrastructure" },
-    { url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1500&q=85", alt: "Semiconductor and computing hardware" },
-  ],
-  robotics: [
-    { url: "https://images.unsplash.com/photo-1535378620166-273708d44e4c?auto=format&fit=crop&w=1500&q=85", alt: "Robotics and automation" },
-    { url: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1500&q=85", alt: "Robot technology" },
-  ],
-  data: [
-    { url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1500&q=85", alt: "Data center servers" },
-    { url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1500&q=85", alt: "Cloud computing network" },
-  ],
-  coding: [
-    { url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1500&q=85", alt: "Computer chips and circuitry" },
-    { url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1500&q=85", alt: "Software engineering workspace" },
-  ],
+// A small, curated set of six dependable editorial themes.
+// Each image is selected from the article's source, title and category.
+const editorialImageSets: Record<string, EditorialImage> = {
+  ai: {
+    url: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1500&q=85",
+    alt: "Abstract artificial intelligence and neural network visualization",
+  },
+  gemini: {
+    url: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1500&q=85",
+    alt: "Scientific visualization representing Google's Gemini and AI research",
+  },
+  robotics: {
+    url: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1500&q=85",
+    alt: "Modern humanoid robot representing robotics and automation",
+  },
+  chips: {
+    url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1500&q=85",
+    alt: "Computer chip and electronic circuit board",
+  },
+  tools: {
+    url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1500&q=85",
+    alt: "Software development workstation representing AI tools",
+  },
+  infrastructure: {
+    url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1500&q=85",
+    alt: "Data center server racks representing AI infrastructure",
+  },
 };
 
-const genericImageIds = ["photo-1677442136019-21780ecad995"];
+function fallbackForArticle(sourceUrl: string | null, title: string, categorySlug: string): EditorialImage {
+  const source = (sourceUrl || "").toLowerCase();
+  const headline = title.toLowerCase();
+  const text = `${source} ${headline}`;
 
-function stableChoice<T>(items: T[], seed: string): T {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
-  return items[Math.abs(hash) % items.length];
-}
+  // Match specific subjects before broad company names.
+  if (/robot|robotics|humanoid|automation| робот|робототех|автоматизац/.test(text)) return editorialImageSets.robotics;
+  if (/chip|gpu|processor|hardware|semiconductor|чип|процесор|напівпровідник|відеокарт/.test(text)) return editorialImageSets.chips;
+  if (/data cent(?:er|re)|cloud infrastructure|server|datacenter|дата-центр|сервер|хмарн.*інфраструктур/.test(text)) return editorialImageSets.infrastructure;
+  if (/coding|programming|developer|software|app|tool|інструмент|програмуван|розробник|застосунок/.test(text)) return editorialImageSets.tools;
 
-function fallbackForArticle(sourceUrl: string | null, title: string, categorySlug: string) {
-  const text = `${sourceUrl || ""} ${title}`.toLowerCase();
-  const choose = (key: string) => stableChoice(editorialImageSets[key], text);
-  if (/openai|chatgpt/.test(text)) return choose("openai");
-  if (/google|gemini|deepmind/.test(text)) return choose("google");
-  if (/anthropic|claude/.test(text)) return choose("anthropic");
-  if (/huggingface|hugging face/.test(text)) return choose("huggingface");
-  if (/robot|robotics|automation/.test(text)) return choose("robotics");
-  if (/chip|gpu|processor|hardware|semiconductor/.test(text)) return choose("coding");
-  if (/data cent(?:er|re)|cloud infrastructure|server/.test(text)) return choose("data");
-  if (/code|coding|developer|programming|software/.test(text)) return choose("tools");
-  if (categorySlug === "tools") return choose("tools");
-  if (categorySlug === "research") return choose("research");
-  if (categorySlug === "industry") return choose("industry");
-  if (categorySlug === "technology") return stableChoice([...editorialImageSets.research, ...editorialImageSets.industry, ...editorialImageSets.data, ...editorialImageSets.robotics], text);
-  return stableChoice([...editorialImageSets.research, ...editorialImageSets.robotics, ...editorialImageSets.data, ...editorialImageSets.coding], text);
-}
+  if (/google|gemini|deepmind|blog\.google/.test(text)) return editorialImageSets.gemini;
+  if (/openai|chatgpt|sora|gpt-[0-9]|openai\.com/.test(text)) return editorialImageSets.ai;
 
-function isGenericPlaceholder(url: string | null | undefined) {
-  return Boolean(url && genericImageIds.some((id) => url.includes(id)));
+  if (categorySlug === "tools") return editorialImageSets.tools;
+  if (categorySlug === "industry") return editorialImageSets.infrastructure;
+  if (categorySlug === "research") return editorialImageSets.chips;
+  if (categorySlug === "technology") return editorialImageSets.infrastructure;
+
+  // General AI/model stories, including Anthropic and Hugging Face, use
+  // the neutral AI visual rather than an unrelated robot or laptop.
+  return editorialImageSets.ai;
 }
 
 export async function getCategories(locale: Locale): Promise<ContentCategory[]> {
@@ -164,11 +134,10 @@ export async function getStories(locale: Locale): Promise<Story[]> {
               day: "numeric", month: "long", year: "numeric"
             }).format(new Date(article.published_at))
           : "";
-        // Older imported rows may already contain the original one-image placeholder.
-        // Treat it like a missing image so each story receives its own topic/company visual.
-        const editorialImage = article.image_url && !isGenericPlaceholder(article.image_url)
-          ? { url: article.image_url, alt: article.image_alt || translation.title }
-          : fallbackForArticle(article.source_url, translation.title, categorySlug);
+        // Use the same six-image editorial system for every imported story.
+        // Some legacy RSS rows contain unrelated/generic thumbnails, so do not
+        // let those stored URLs override the topic-matched visual.
+        const editorialImage = fallbackForArticle(article.source_url, translation.title, categorySlug);
         result.push({
           slug: translation.slug,
           category: categoryName,
