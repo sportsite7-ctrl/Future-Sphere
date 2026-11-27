@@ -262,3 +262,47 @@ body{background:var(--paper);color:var(--ink);font-family:"DM Sans","Onest",Aria
  .footer-main{gap:22px}
  .footer-links{gap:14px}
 }
+
+
+/* Evidence-first benchmark rankings */
+.ranking-page{padding-top:54px;padding-bottom:90px}
+.ranking-hero{max-width:800px;margin:22px 0 34px}
+.ranking-hero h1{margin:13px 0;font-family:Manrope,sans-serif;font-size:clamp(40px,6vw,64px);line-height:1.08;letter-spacing:-.065em;font-weight:600}
+.ranking-hero h1 span{color:#8bb4d2}
+.ranking-hero>p{max-width:700px;color:#74838d;font-size:15px;line-height:1.8}
+.ranking-principles{margin:32px 0 42px;padding:22px 26px;border:1px solid #e1e9ec;border-radius:9px;background:#f3f7f8}
+.ranking-principles h2,.ranking-methodology h2{margin:0 0 12px;font-family:Manrope,sans-serif;font-size:18px;letter-spacing:-.03em}
+.ranking-principles ul{margin:0;padding-left:18px;color:#6f7e88;font-size:12px;line-height:1.9}
+.ranking-empty{padding:42px 28px;border:1px dashed #d7e2e7;border-radius:9px;text-align:center;background:#fff}
+.ranking-empty h2{margin:0 0 10px;font-family:Manrope,sans-serif;font-size:20px}
+.ranking-empty p,.ranking-methodology p{max-width:760px;margin:0 auto;color:#7b8991;font-size:12px;line-height:1.85}
+.ranking-groups{display:grid;gap:30px}
+.ranking-group{min-width:0;border:1px solid #e2e9e9;border-radius:9px;background:#fff;overflow:hidden}
+.ranking-group-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 24px;border-bottom:1px solid #e8eeee}
+.ranking-category{color:#7c9eb4;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.ranking-group-heading h2{margin:7px 0 4px;font-family:Manrope,sans-serif;font-size:21px}
+.ranking-group-heading p{margin:0;color:#8b989f;font-size:10px}
+.ranking-group-heading>a{flex-shrink:0;color:#6489a2;font-size:10px;font-weight:700}
+.ranking-table-wrap{width:100%;overflow-x:auto}
+.ranking-table{width:100%;border-collapse:collapse;text-align:left;font-size:11px}
+.ranking-table th{padding:13px 14px;background:#f6f8f8;color:#81909a;font-size:9px;font-weight:700;white-space:nowrap}
+.ranking-table td{padding:15px 14px;border-top:1px solid #edf0f0;color:#64737d;vertical-align:top}
+.ranking-table td:first-child{color:#9aabb4;font-weight:700}
+.ranking-table td a{color:#4e7897}
+.ranking-table td small{display:block;margin-top:4px;color:#98a3a9;font-size:9px}
+.ranking-table .ranking-score{color:#304d62;font-weight:800;white-space:nowrap}
+.ranking-evidence{min-width:150px;display:grid;gap:6px}
+.ranking-evidence>span{color:#718a9a;font-size:9px;font-weight:700}
+.ranking-evidence a{font-size:9px;line-height:1.5}
+.ranking-methodology{margin-top:42px;padding-top:25px;border-top:1px solid #e2e9e9}
+.ranking-methodology p{margin:0}
+@media(max-width:700px){
+ .ranking-page{padding-top:35px;padding-bottom:55px}
+ .ranking-hero{margin:18px 0 25px}
+ .ranking-hero>p{font-size:13px}
+ .ranking-principles{padding:18px;margin:24px 0 30px}
+ .ranking-group-heading{align-items:flex-start;flex-direction:column;padding:18px}
+ .ranking-table{min-width:760px}
+ .ranking-table th,.ranking-table td{padding:12px 10px}
+ .ranking-empty{padding:30px 18px}
+}
