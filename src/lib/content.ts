@@ -137,20 +137,14 @@ export async function getStories(locale: Locale): Promise<Story[]> {
               day: "numeric", month: "long", year: "numeric"
             }).format(new Date(article.published_at))
           : "";
-        // Use the same six-image editorial system for every imported story.
-        // Some legacy RSS rows contain unrelated/generic thumbnails, so do not
-        // let those stored URLs override the topic-matched visual.
+        // Use the curated editorial image mapping consistently.
+        // The database contains legacy fallback URLs that were incorrectly
+        // marked as article-source images, so image_source_url is NOT reliable
+        // provenance for existing rows. Ignore stored thumbnails until a
+        // dedicated, verified RSS-image provenance field is introduced.
         const editorialImage = fallbackForArticle(article.source_url, translation.title, categorySlug);
-        // Prefer a real image extracted from this article's own RSS item.
-        // Old manually assigned stock URLs are ignored unless their source URL
-        // matches this article, preventing one legacy placeholder spreading site-wide.
-        const hasSourceImage = Boolean(
-          article.image_url &&
-          article.image_source_url &&
-          article.image_source_url === article.source_url
-        );
-        const displayImage = hasSourceImage ? article.image_url as string : editorialImage.url;
-        const displayAlt = hasSourceImage && article.image_alt ? article.image_alt : editorialImage.alt;
+        const displayImage = editorialImage.url;
+        const displayAlt = editorialImage.alt;
         result.push({
           slug: translation.slug,
           category: categoryName,
