@@ -1,9 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { NewsCard } from "@/components/news-card";
 import { Pagination } from "@/components/pagination";
 import { getStories } from "@/lib/content";
 import { getLocale } from "@/lib/locale";
 import { t, localizeStory } from "@/lib/i18n";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return {
+    title: locale === "en" ? "Latest AI News" : "Останні новини про штучний інтелект",
+    description: locale === "en"
+      ? "Browse the latest artificial intelligence news, model announcements, research and industry updates."
+      : "Читайте останні новини про штучний інтелект, запуск моделей, дослідження та події індустрії.",
+    alternates: { canonical: "/news" },
+  };
+}
 
 export default async function NewsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const locale = await getLocale();
