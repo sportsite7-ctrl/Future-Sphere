@@ -62,7 +62,7 @@ export default async function RankingsPage() {
     const sources = evidenceByResult.get(result.id) ?? [];
     if (!model || !benchmark || sources.length === 0) continue;
     const key = [result.benchmark_id, result.evaluation_version, result.harness].join("::");
-    const group = groups.get(key) ?? {
+    const group: { benchmark: Row; version: string; harness: string; rows: Row[] } = groups.get(key) ?? {
       benchmark,
       version: result.evaluation_version,
       harness: result.harness,
