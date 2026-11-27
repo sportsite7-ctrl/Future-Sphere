@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandSymbol } from "@/components/brand-symbol";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return {
+    title: locale === "en" ? "About Future Sphere" : "Про Future Sphere",
+    description: locale === "en"
+      ? "Learn about Future Sphere's approach to AI news, research, original sources and clear technology explanations."
+      : "Дізнайтеся про редакційний підхід Future Sphere до новин ШІ, досліджень, першоджерел і пояснення технологій.",
+    alternates: { canonical: "/about" },
+  };
+}
 
 export default async function AboutPage() {
   const locale = await getLocale();
