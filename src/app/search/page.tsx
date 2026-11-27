@@ -1,8 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { NewsCard } from "@/components/news-card";
 import { getStories } from "@/lib/content";
 import { getLocale } from "@/lib/locale";
 import { t, localizeStory } from "@/lib/i18n";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return {
+    title: locale === "en" ? "Search Future Sphere" : "Пошук Future Sphere",
+    description: locale === "en" ? "Search AI news, models, tools and research on Future Sphere." : "Пошук новин про ШІ, моделі, інструменти та дослідження на Future Sphere.",
+    robots: { index: false, follow: true },
+  };
+}
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q = "" } = await searchParams;
