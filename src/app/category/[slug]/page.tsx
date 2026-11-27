@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NewsCard } from "@/components/news-card";
@@ -6,6 +7,18 @@ import { getLocale } from "@/lib/locale";
 import { t, localizeStory } from "@/lib/i18n";
 
 export async function generateStaticParams() { return []; }
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const locale = await getLocale();
+  const category = (await getCategories(locale)).find((item) => item.slug === slug);
+  if (!category) return { robots: { index: false, follow: true } };
+  return {
+    title: locale === "en" ? category.name + " — AI News & Insights" : category.name + " — новини та огляди",
+    description: category.description,
+    alternates: { canonical: "/category/" + slug },
+  };
+}
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
