@@ -37,7 +37,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     <>
       <section className="hero-section page-shell">
         <div className="hero-intro">
-          <div className="eyebrow"><span className="eyebrow-dot" /> {copy.heroEyebrow} <span className="eyebrow-line" /> 24.11.2026</div>
+          <div className="eyebrow"><span className="eyebrow-dot" /> {copy.heroEyebrow} <span className="eyebrow-line" /> {lead.date}</div>
           <h1>{copy.heroTitleA} <span>{copy.heroTitleB}</span></h1>
           <p>{copy.heroText}</p>
           <div className="hero-actions"><Link href="/category/ai-models" className="button-primary">{copy.explore} <span>↗</span></Link><Link href="/about" className="button-quiet">{copy.howItWorks} <span>→</span></Link></div>
