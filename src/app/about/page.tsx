@@ -30,7 +30,6 @@ export default async function AboutPage() {
       <div className="about-principles">
         {copy.principles.map(([label, title, description]) => <article key={label}><span>{label}</span><h2>{title}</h2><p>{description}</p></article>)}
       </div>
-      <div className="about-note"><span className="section-kicker">{copy.development}</span><p>{copy.prototype}</p><Link href="/news" className="button-primary">{copy.viewMaterials} <span>↗</span></Link></div>
     </section>
   );
 }
