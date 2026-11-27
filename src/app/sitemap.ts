@@ -25,7 +25,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((story) => !story.isDemo)
     .map((story) => ({
       url: `${siteUrl}/article/${story.slug}`,
-      lastModified: story.publishedAt ? new Date(story.publishedAt) : undefined,
       changeFrequency: "weekly",
       priority: 0.6,
     }));
