@@ -106,7 +106,9 @@ export default async function RankingsPage() {
     directoryTitle: "Benchmarks we track",
     modelsTitle: "Model directory",
     modelsText: "Models are listed only when we can point to an official provider page. A listing is not an endorsement or an overall quality ranking.",
-    providerNote: "Provider-reported data",
+    providerNote: "In model directory · benchmark result not yet added",
+    coverageTitle: "Current benchmark coverage",
+    coverageText: "The sourced score tables currently contain provider-reported DeepSeek results only. Other models are listed below, but are not ranked until comparable, traceable benchmark results are added.",
     directoryText: "These are separate evaluation systems, not one combined ranking. Open each source to inspect its current release and methodology.",
     caution: "Important caveat",
   } : {
@@ -135,7 +137,9 @@ export default async function RankingsPage() {
     directoryTitle: "Бенчмарки, за якими ми стежимо",
     modelsTitle: "Каталог AI-моделей",
     modelsText: "Додаємо моделі лише за наявності офіційної сторінки розробника. Наявність у каталозі не є оцінкою якості чи рекомендацією.",
-    providerNote: "Дані від розробника",
+    providerNote: "У каталозі · результат тесту ще не додано",
+    coverageTitle: "Поточне покриття рейтингів",
+    coverageText: "У таблицях результатів наразі є лише показники DeepSeek, заявлені самим розробником. Інші моделі наведені нижче, але не ранжуються, доки не будуть додані зіставні результати з перевірюваними джерелами.",
     directoryText: "Це окремі системи оцінювання, а не один спільний рейтинг. Відкривайте першоджерела, щоб перевіряти актуальну версію та методологію.",
     caution: "Важливе застереження",
   };
@@ -152,6 +156,13 @@ export default async function RankingsPage() {
         <h2 id="ranking-principles-title">{text.ruleTitle}</h2>
         <ul><li>{text.rule1}</li><li>{text.rule2}</li><li>{text.rule3}</li></ul>
       </section>
+
+      {!unavailable && results.length > 0 && (
+        <aside className="ranking-coverage-notice" aria-label={text.coverageTitle}>
+          <strong>{text.coverageTitle}</strong>
+          <p>{text.coverageText}</p>
+        </aside>
+      )}
 
       {unavailable ? (
         <div className="ranking-empty"><h2>{text.unavailable}</h2><p>{text.emptyHint}</p></div>
@@ -206,7 +217,7 @@ export default async function RankingsPage() {
                 </div>
                 <h3>{model.official_url ? <a href={model.official_url} target="_blank" rel="noreferrer">{model.name} ↗</a> : model.name}</h3>
                 <p>{[model.model_family, model.model_type].filter(Boolean).join(" · ")}</p>
-                <span className="ranking-provider-note">{text.providerNote}</span>
+                <span className="ranking-provider-note">{results.some((result) => result.model_id === model.id) ? (en ? "Has sourced result(s)" : "Є результати з джерелами") : text.providerNote}</span>
               </article>
             ))}
           </div>
