@@ -67,10 +67,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   };
   return (
     <article className="article-page page-shell">
-      <script
+      {!story.isDemo && <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
-      />
+      />}
       <div className="article-breadcrumb"><Link href="/">{copy.home}</Link><span>/</span><Link href={`/category/${story.categorySlug}`}>{story.category}</Link><span>/</span><span>{copy.readArticle}</span></div>
       <header className="article-header"><span className="article-category">{story.category}{story.isDemo ? ` · ${copy.demoArticle}` : ""}</span><h1>{story.title}</h1><p className="article-deck">{story.excerpt}</p>
         <div className="article-byline"><span className="byline-avatar">FS</span><span><b>{copy.editor}</b><small>{story.date} · {story.readTime}</small></span></div>
