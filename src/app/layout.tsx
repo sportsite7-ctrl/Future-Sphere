@@ -8,6 +8,7 @@ import { t } from "@/lib/i18n";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  verification: { google: "OzXopRCsAITVXAZ6F-izhB34Tjtq5fOv_9E5dxB13PA" },
   title: { default: "Future Sphere — AI news and insights", template: "%s | Future Sphere" },
   description: "News, research and clear explanations about artificial intelligence and emerging technology.",
   applicationName: "Future Sphere",
