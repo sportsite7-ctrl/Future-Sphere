@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getLocale } from "@/lib/locale";
 import { supabase } from "@/lib/supabase";
 
