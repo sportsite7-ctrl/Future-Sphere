@@ -13,7 +13,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: siteUrl, changeFrequency: "daily", priority: 1 },
     { url: `${siteUrl}/news`, changeFrequency: "daily", priority: 0.9 },
     { url: `${siteUrl}/about`, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${siteUrl}/search`, changeFrequency: "weekly", priority: 0.4 },
   ];
 
   const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
@@ -26,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((story) => !story.isDemo)
     .map((story) => ({
       url: `${siteUrl}/article/${story.slug}`,
+      lastModified: story.publishedAt ? new Date(story.publishedAt) : undefined,
       changeFrequency: "weekly",
       priority: 0.6,
     }));
