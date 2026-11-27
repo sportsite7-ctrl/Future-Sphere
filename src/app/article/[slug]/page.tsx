@@ -11,10 +11,34 @@ export async function generateStaticParams() { return []; }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const story = (await getStories(await getLocale())).find((item) => item.slug === slug);
+  const locale = await getLocale();
+  const story = (await getStories(locale)).find((item) => item.slug === slug);
   if (!story) return {};
-  const localized = localizeStory(story, await getLocale());
-  return { title: localized.title, description: localized.excerpt };
+  const localized = localizeStory(story, locale);
+  const title = localized.seoTitle || localized.title;
+  const description = localized.seoDescription || localized.excerpt;
+  const canonical = `https://future-sphere-henna.vercel.app/article/${slug}`;
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      url: canonical,
+      title,
+      description,
+      images: localized.image ? [{ url: localized.image, alt: localized.imageAlt }] : [],
+      publishedTime: localized.publishedAt,
+      siteName: "Future Sphere",
+      locale: locale === "uk" ? "uk_UA" : "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: localized.image ? [localized.image] : [],
+    },
+  };
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -26,8 +50,27 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   if (!original) notFound();
   const story = localizeStory(original, locale);
   const related = stories.filter((item) => item.slug !== story.slug).slice(0, 2).map((item) => localizeStory(item, locale));
+  const canonical = `https://future-sphere-henna.vercel.app/article/${slug}`;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: story.seoTitle || story.title,
+    description: story.seoDescription || story.excerpt,
+    image: [story.image],
+    datePublished: story.publishedAt,
+    dateModified: story.publishedAt,
+    inLanguage: locale === "uk" ? "uk-UA" : "en",
+    mainEntityOfPage: canonical,
+    author: { "@type": "Organization", name: "Future Sphere Editorial Team" },
+    publisher: { "@type": "Organization", name: "Future Sphere" },
+    ...(story.sourceUrl ? { isBasedOn: story.sourceUrl } : {}),
+  };
   return (
     <article className="article-page page-shell">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+      />
       <div className="article-breadcrumb"><Link href="/">{copy.home}</Link><span>/</span><Link href={`/category/${story.categorySlug}`}>{story.category}</Link><span>/</span><span>{copy.readArticle}</span></div>
       <header className="article-header"><span className="article-category">{story.category}{story.isDemo ? ` · ${copy.demoArticle}` : ""}</span><h1>{story.title}</h1><p className="article-deck">{story.excerpt}</p>
         <div className="article-byline"><span className="byline-avatar">FS</span><span><b>{copy.editor}</b><small>{story.date} · {story.readTime}</small></span></div>
