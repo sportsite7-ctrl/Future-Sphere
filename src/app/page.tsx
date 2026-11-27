@@ -33,8 +33,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const lead = localizeStory(pageStories[0] || orderedStories[0], locale);
   const secondary = pageStories.slice(1, 3).map((story) => localizeStory(story, locale));
   const latest = pageStories.slice(3, 5).map((story) => localizeStory(story, locale));
+  const websiteStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Future Sphere",
+    alternateName: "FutureSphere",
+    url: "https://future-sphere-henna.vercel.app/"
+  };
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteStructuredData).replace(/</g, "\\u003c") }} />
+
       <section className="hero-section page-shell">
         <div className="hero-intro">
           <div className="eyebrow"><span className="eyebrow-dot" /> {copy.heroEyebrow} <span className="eyebrow-line" /> {lead.date}</div>
