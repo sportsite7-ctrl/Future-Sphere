@@ -44,22 +44,25 @@ function fallbackForArticle(sourceUrl: string | null, title: string, categorySlu
   const headline = title.toLowerCase();
   const text = `${source} ${headline}`;
 
-  // Match specific subjects before broad company names.
-  if (/robot|robotics|humanoid|automation| робот|робототех|автоматизац/.test(text)) return editorialImageSets.robotics;
-  if (/chip|gpu|processor|hardware|semiconductor|чип|процесор|напівпровідник|відеокарт/.test(text)) return editorialImageSets.chips;
-  if (/data cent(?:er|re)|cloud infrastructure|server|datacenter|дата-центр|сервер|хмарн.*інфраструктур/.test(text)) return editorialImageSets.infrastructure;
-  if (/coding|programming|developer|software|app|tool|інструмент|програмуван|розробник|застосунок/.test(text)) return editorialImageSets.tools;
+  // Specific physical subjects take priority over company names.
+  if (/robotics|humanoid|robot\b|робототех|гуманоїд|робот\b|автоматизац/.test(text)) return editorialImageSets.robotics;
+  if (/gpu|chipset|semiconductor|processor|hardware|microchip|чип|процесор|напівпровідник|відеокарт|графічн.*процесор/.test(text)) return editorialImageSets.chips;
+  if (/data cent(?:er|re)|datacenter|server farm|cloud infrastructure|дата.?центр|серверн.*інфраструктур|хмарн.*інфраструктур/.test(text)) return editorialImageSets.infrastructure;
+  if (/ai tool|ai assistant app|software tool|developer tool|coding assistant|платформ.*інструмент|інструмент.*ш[іi]|застосунок|програмн.*засіб/.test(text)) return editorialImageSets.tools;
 
+  // Brand-specific matches prevent a generic "AI" word from winning first.
   if (/google|gemini|deepmind|blog\.google/.test(text)) return editorialImageSets.gemini;
-  if (/openai|chatgpt|sora|gpt-[0-9]|openai\.com/.test(text)) return editorialImageSets.ai;
+  if (/openai|chatgpt|sora|gpt[- ]?[0-9]|openai\.com/.test(text)) return editorialImageSets.ai;
+  if (/anthropic|claude|\bsonnet\b|\bopus\b/.test(text)) return editorialImageSets.ai;
+  if (/hugging.?face|hf\.co/.test(text)) return editorialImageSets.tools;
 
+  // Use the article's editorial category only as a fallback, not as the
+  // primary classifier. Research/model announcements should not become chip photos.
   if (categorySlug === "tools") return editorialImageSets.tools;
   if (categorySlug === "industry") return editorialImageSets.infrastructure;
-  if (categorySlug === "research") return editorialImageSets.chips;
+  if (categorySlug === "research" || categorySlug === "ai-models") return editorialImageSets.ai;
   if (categorySlug === "technology") return editorialImageSets.infrastructure;
 
-  // General AI/model stories, including Anthropic and Hugging Face, use
-  // the neutral AI visual rather than an unrelated robot or laptop.
   return editorialImageSets.ai;
 }
 
@@ -94,7 +97,7 @@ export async function getStories(locale: Locale): Promise<Story[]> {
   try {
     const { data: articles, error: articlesError } = await supabase
       .from("articles")
-      .select("id,category_id,source_url,status,is_featured,published_at,image_url,image_alt,image_credit")
+      .select("id,category_id,source_url,status,is_featured,published_at,image_url,image_alt,image_credit,image_source_url")
       .eq("status", "published")
       .order("published_at", { ascending: false });
     if (articlesError) throw articlesError;
@@ -138,6 +141,16 @@ export async function getStories(locale: Locale): Promise<Story[]> {
         // Some legacy RSS rows contain unrelated/generic thumbnails, so do not
         // let those stored URLs override the topic-matched visual.
         const editorialImage = fallbackForArticle(article.source_url, translation.title, categorySlug);
+        // Prefer a real image extracted from this article's own RSS item.
+        // Old manually assigned stock URLs are ignored unless their source URL
+        // matches this article, preventing one legacy placeholder spreading site-wide.
+        const hasSourceImage = Boolean(
+          article.image_url &&
+          article.image_source_url &&
+          article.image_source_url === article.source_url
+        );
+        const displayImage = hasSourceImage ? article.image_url as string : editorialImage.url;
+        const displayAlt = hasSourceImage && article.image_alt ? article.image_alt : editorialImage.alt;
         result.push({
           slug: translation.slug,
           category: categoryName,
@@ -148,8 +161,8 @@ export async function getStories(locale: Locale): Promise<Story[]> {
           readTime: locale === "en"
             ? `${Math.max(1, Math.ceil(wordCount / 200))} min read`
             : `${Math.max(1, Math.ceil(wordCount / 200))} хв читання`,
-          image: editorialImage.url,
-          imageAlt: editorialImage.alt,
+          image: displayImage,
+          imageAlt: displayAlt,
           body: paragraphs.length ? paragraphs : (bodyText ? [bodyText] : []),
           isDemo: false,
           sourceUrl: article.source_url ?? undefined,
