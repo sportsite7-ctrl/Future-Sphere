@@ -88,7 +88,6 @@ create policy "Public can read published benchmark results" on public.ai_benchma
     is_published = true
     and exists (select 1 from public.ai_models m where m.id = model_id and m.is_published = true)
     and exists (select 1 from public.ai_benchmarks b where b.id = benchmark_id and b.is_published = true)
-    and exists (select 1 from public.ai_benchmark_evidence e where e.result_id = id)
   );
 
 drop policy if exists "Public can read evidence for published results" on public.ai_benchmark_evidence;
