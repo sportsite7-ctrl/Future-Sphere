@@ -158,6 +158,7 @@ export async function getStories(locale: Locale): Promise<Story[]> {
           title: translation.title,
           excerpt: translation.excerpt ?? "",
           date,
+          publishedAt: article.published_at ?? undefined,
           readTime: locale === "en"
             ? `${Math.max(1, Math.ceil(wordCount / 200))} min read`
             : `${Math.max(1, Math.ceil(wordCount / 200))} хв читання`,
