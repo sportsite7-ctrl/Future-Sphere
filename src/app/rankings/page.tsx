@@ -108,7 +108,7 @@ export default async function RankingsPage() {
     modelsText: "Models are listed only when we can point to an official provider page. A listing is not an endorsement or an overall quality ranking.",
     providerNote: "In model directory · benchmark result not yet added",
     coverageTitle: "Current benchmark coverage",
-    coverageText: "The sourced score tables currently contain provider-reported DeepSeek results only. Other models are listed below, but are not ranked until comparable, traceable benchmark results are added.",
+    coverageText: "The page now includes a comparable Arena Agent Arena Index snapshot across OpenAI, Anthropic and Google, alongside separately labeled provider-reported DeepSeek results. These are distinct evaluation sources and must not be compared across benchmark groups.",
     directoryText: "These are separate evaluation systems, not one combined ranking. Open each source to inspect its current release and methodology.",
     caution: "Important caveat",
   } : {
@@ -139,7 +139,7 @@ export default async function RankingsPage() {
     modelsText: "Додаємо моделі лише за наявності офіційної сторінки розробника. Наявність у каталозі не є оцінкою якості чи рекомендацією.",
     providerNote: "У каталозі · результат тесту ще не додано",
     coverageTitle: "Поточне покриття рейтингів",
-    coverageText: "У таблицях результатів наразі є лише показники DeepSeek, заявлені самим розробником. Інші моделі наведені нижче, але не ранжуються, доки не будуть додані зіставні результати з перевірюваними джерелами.",
+    coverageText: "На сторінці є зіставний знімок Arena Agent Arena Index для моделей OpenAI, Anthropic і Google, а також окремо позначені результати DeepSeek, заявлені самим розробником. Це різні системи оцінювання, їх не можна порівнювати між собою.",
     directoryText: "Це окремі системи оцінювання, а не один спільний рейтинг. Відкривайте першоджерела, щоб перевіряти актуальну версію та методологію.",
     caution: "Важливе застереження",
   };
