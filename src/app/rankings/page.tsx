@@ -26,7 +26,7 @@ export default async function RankingsPage() {
   let unavailable = false;
 
   const [modelsQuery, benchmarksQuery, resultsQuery] = await Promise.all([
-    supabase.from("ai_models").select("id,slug,name,provider,official_url").eq("is_published", true),
+    supabase.from("ai_models").select("id,slug,name,provider,model_family,release_date,official_url,model_type").eq("is_published", true),
     supabase.from("ai_benchmarks").select("id,slug,name,category,description,methodology_url,leaderboard_url,higher_is_better").eq("is_published", true),
     supabase.from("ai_benchmark_results").select("id,model_id,benchmark_id,score,score_unit,evaluation_date,evaluation_version,harness,sample_size,evidence_grade,notes").eq("is_published", true).order("evaluation_date", { ascending: false }),
   ]);
@@ -104,6 +104,9 @@ export default async function RankingsPage() {
     benchmarkSource: "Benchmark methodology",
     checked: "Source checked",
     directoryTitle: "Benchmarks we track",
+    modelsTitle: "Model directory",
+    modelsText: "Models are listed only when we can point to an official provider page. A listing is not an endorsement or an overall quality ranking.",
+    providerNote: "Provider-reported data",
     directoryText: "These are separate evaluation systems, not one combined ranking. Open each source to inspect its current release and methodology.",
     caution: "Important caveat",
   } : {
@@ -130,6 +133,9 @@ export default async function RankingsPage() {
     benchmarkSource: "Методологія тесту",
     checked: "Джерело перевірено",
     directoryTitle: "Бенчмарки, за якими ми стежимо",
+    modelsTitle: "Каталог AI-моделей",
+    modelsText: "Додаємо моделі лише за наявності офіційної сторінки розробника. Наявність у каталозі не є оцінкою якості чи рекомендацією.",
+    providerNote: "Дані від розробника",
     directoryText: "Це окремі системи оцінювання, а не один спільний рейтинг. Відкривайте першоджерела, щоб перевіряти актуальну версію та методологію.",
     caution: "Важливе застереження",
   };
@@ -183,6 +189,28 @@ export default async function RankingsPage() {
             </section>
           ))}
         </div>
+      )}
+
+      {!unavailable && models.length > 0 && (
+        <section className="ranking-model-directory">
+          <div className="ranking-directory-heading">
+            <h2>{text.modelsTitle}</h2>
+            <p>{text.modelsText}</p>
+          </div>
+          <div className="ranking-model-grid">
+            {models.map((model) => (
+              <article className="ranking-model-card" key={model.id}>
+                <div className="ranking-model-card-top">
+                  <span className="ranking-category">{model.provider}</span>
+                  <span className="ranking-model-date">{model.release_date ? new Date(model.release_date + "T00:00:00").toLocaleDateString(en ? "en-US" : "uk-UA") : ""}</span>
+                </div>
+                <h3>{model.official_url ? <a href={model.official_url} target="_blank" rel="noreferrer">{model.name} ↗</a> : model.name}</h3>
+                <p>{[model.model_family, model.model_type].filter(Boolean).join(" · ")}</p>
+                <span className="ranking-provider-note">{text.providerNote}</span>
+              </article>
+            ))}
+          </div>
+        </section>
       )}
 
       {!unavailable && benchmarks.length > 0 && (
