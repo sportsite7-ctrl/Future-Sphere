@@ -3,7 +3,7 @@ export type Story = {
   excerpt: string; date: string; readTime: string; image: string;
   imageAlt: string; body: string[];
   isDemo?: boolean; isFeatured?: boolean; sourceUrl?: string;
-  imageCredit?: string; seoTitle?: string; seoDescription?: string;
+  imageCredit?: string; seoTitle?: string; seoDescription?: string; publishedAt?: string;
 };
 
 export const stories: Story[] = [
