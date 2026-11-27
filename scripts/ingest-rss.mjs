@@ -57,21 +57,58 @@ function validHttpUrl(value) {
     return false;
   }
 }
+function decodeHtmlUrl(value = "") {
+  return String(value)
+    .replace(/&amp;/gi, "&")
+    .replace(/&#38;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'");
+}
+
 function extractImage(item) {
-  const mediaContent = item["media:content"];
-  const mediaThumbnail = item["media:thumbnail"];
-  const candidates = [
-    { url: item.enclosure?.url, type: item.enclosure?.type },
-    { url: item.image?.url || (typeof item.image === "string" ? item.image : null), type: "image" },
-    { url: item.itunes?.image?.href || item.itunes?.image, type: "image" },
-    { url: mediaContent?.url || mediaContent?.$?.url, type: mediaContent?.type || mediaContent?.$?.type || mediaContent?.medium },
-    { url: mediaThumbnail?.url || mediaThumbnail?.$?.url, type: "image" },
-  ];
+  const candidates = [];
+  const add = (url, type = "image") => {
+    if (typeof url === "string") candidates.push({ url: decodeHtmlUrl(url.trim()), type });
+  };
+
+  // Standard RSS enclosures and common media extensions.
+  add(item.enclosure?.url, item.enclosure?.type);
+  add(item.image?.url || (typeof item.image === "string" ? item.image : null));
+  add(item.itunes?.image?.href || item.itunes?.image);
+  const mediaContent = item["media:content"] || item.media?.content;
+  const mediaThumbnail = item["media:thumbnail"] || item.media?.thumbnail;
+  const mediaItems = Array.isArray(mediaContent) ? mediaContent : [mediaContent];
+  for (const media of mediaItems) {
+    add(media?.url || media?.$?.url, media?.type || media?.$?.type || media?.medium || "image");
+  }
+  const thumbnails = Array.isArray(mediaThumbnail) ? mediaThumbnail : [mediaThumbnail];
+  for (const media of thumbnails) add(media?.url || media?.$?.url, "image");
+
+  // Many publishers put the only image inside content:encoded / description HTML.
+  const htmlFields = [
+    item["content:encoded"], item.content, item.summary, item.description,
+    item.contentSnippet,
+  ].filter((value) => typeof value === "string");
+  for (const html of htmlFields) {
+    const decoded = String(html)
+      .replace(/&lt;/gi, "<").replace(/&gt;/gi, ">").replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'").replace(/&amp;/gi, "&");
+    const imgTags = decoded.match(/<img\b[^>]*>/gi) || [];
+    for (const tag of imgTags) {
+      const src = tag.match(/\b(?:src|data-src|data-original)=["']([^"']+)["']/i)?.[1];
+      const srcset = tag.match(/\bsrcset=["']([^"']+)["']/i)?.[1];
+      add(src);
+      if (!src && srcset) add(srcset.split(",")[0].trim().split(/\s+/)[0]);
+    }
+    const enclosureLinks = decoded.match(/https?:[^\s"'<>]+\.(?:avif|gif|jpe?g|png|webp)(?:\?[^\s"'<>]*)?/gi) || [];
+    for (const url of enclosureLinks) add(url);
+  }
+
   const match = candidates.find(({ url, type }) =>
-    typeof url === "string" &&
     validHttpUrl(url) &&
+    !/(?:avatar|logo|icon|tracking|pixel|spacer)/i.test(url) &&
     (String(type || "").toLowerCase().startsWith("image") ||
-      (!type && /\.(avif|gif|jpe?g|png|webp)(?:[?#]|$)/i.test(url)))
+      /\.(avif|gif|jpe?g|png|webp)(?:[?#]|$)/i.test(url))
   );
   return match?.url || null;
 }
@@ -220,13 +257,23 @@ async function findOrCreateArticle({ link, sourceId, categoryId, publishedAt, im
     .maybeSingle();
   if (lookupError) throw lookupError;
   if (existing) {
-    if (imageUrl && existing.image_url !== imageUrl) {
-      const { error: imageUpdateError } = await supabase.from("articles").update({
-        image_url: imageUrl,
-        image_alt: imageAlt,
-        image_credit: sourceName,
-        image_source_url: link,
-      }).eq("id", existing.id);
+    const verifiedMarker = `rss-image:${link}`;
+    const imagePatch = imageUrl
+      ? {
+          image_url: imageUrl,
+          image_alt: imageAlt,
+          image_credit: sourceName,
+          image_source_url: verifiedMarker,
+        }
+      : existing.image_source_url !== verifiedMarker
+        ? { image_url: null, image_alt: null, image_credit: null, image_source_url: null }
+        : null;
+    if (imagePatch && (
+      imagePatch.image_url !== existing.image_url ||
+      imagePatch.image_source_url !== existing.image_source_url
+    )) {
+      const { error: imageUpdateError } = await supabase.from("articles")
+        .update(imagePatch).eq("id", existing.id);
       if (imageUpdateError) throw imageUpdateError;
     }
     return existing;
@@ -240,7 +287,7 @@ async function findOrCreateArticle({ link, sourceId, categoryId, publishedAt, im
       image_url: imageUrl,
       image_alt: imageAlt,
       image_credit: imageUrl ? sourceName : null,
-      image_source_url: imageUrl ? link : null,
+      image_source_url: imageUrl ? `rss-image:${link}` : null,
       status: "draft",
       is_featured: false,
       published_at: Number.isNaN(Date.parse(publishedAt))
