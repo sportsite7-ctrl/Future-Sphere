@@ -3,7 +3,6 @@ import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getLocale } from "@/lib/locale";
-import { t } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -13,13 +12,12 @@ export const metadata: Metadata = {
   title: { default: "Future Sphere — AI news and insights", template: "%s | Future Sphere" },
   description: "News, research and clear explanations about artificial intelligence and emerging technology.",
   applicationName: "Future Sphere",
-  openGraph: { title: "Future Sphere", description: "Tomorrow's technology, understood today.", type: "website" },
+  openGraph: { title: "Future Sphere — AI news and insights", description: "News, research and clear explanations about artificial intelligence and emerging technology.", type: "website", url: "https://future-sphere-henna.vercel.app" },
   robots: { index: true, follow: true }
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
-  const copy = t(locale);
   return (
     <html lang={locale}>
       <body>
