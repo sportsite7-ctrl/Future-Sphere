@@ -13,6 +13,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
   const copy = t(locale);
   const navItems = [
     { label: copy.navNews, href: "/news" },
+    { label: locale === "en" ? "Rankings" : "Рейтинги", href: "/rankings" },
     { label: copy.navModels, href: "/category/ai-models" },
     { label: copy.navTools, href: "/category/tools" },
     { label: copy.navResearch, href: "/category/research" },
