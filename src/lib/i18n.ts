@@ -8,7 +8,7 @@ const ui = {
     search: "Пошук", home: "Головна", allNews: "Усі матеріали", about: "Про проєкт",
     heroEyebrow: "THE AI BRIEFING", heroTitleA: "Майбутнє вже", heroTitleB: "відбувається.",
     heroText: "Головне зі світу штучного інтелекту. Без зайвого шуму — з контекстом, поясненнями та ідеями.",
-    explore: "Досліджувати AI", howItWorks: "Як це працює", editorPick: "ВИБІР РЕДАКЦІЇ · ДЕМО", read: "Читати матеріал",
+    explore: "Досліджувати AI", howItWorks: "Як це працює", editorPick: "ВИБІР РЕДАКЦІЇ", read: "Читати матеріал",
     navigation: "НАВІГАЦІЯ", worthKnowing: "ВАРТО ЗНАТИ", ideas: "Ідеї, що формують завтра", allMaterials: "Усі матеріали",
     freshView: "СВІЖИЙ ПОГЛЯД", latest: "Останні матеріали", demoFeed: "Демо-стрічка",
     lessNoise: "Менше шуму.", moreUnderstanding: "Більше розуміння.", editorialText: "Ми пояснюємо не лише що сталося, а й чому це має значення.",
@@ -16,7 +16,7 @@ const ui = {
     newModels: "Нові AI-моделі", aiTools: "AI-інструменти", openResearch: "Відкриті дослідження", newTech: "Нові технології",
     manifestoTitle: "Зрозуміти технології.", manifestoSub: "Побачити можливості.", manifestoText: "Ми створюємо простір, де складні технології стають зрозумілими, а важливі відкриття не губляться серед інформаційного потоку.",
     footerNote: "Технології майбутнього — зрозуміло сьогодні.", footerNews: "Усі новини", footerAbout: "Про проєкт", footerTagline: "Незалежний погляд на розвиток AI",
-    library: "БІБЛІОТЕКА FUTURE SPHERE", listingDescription: "Добірка матеріалів про нові моделі, AI-інструменти, дослідження та технології. Зараз тут розміщені демонстраційні публікації.",
+    library: "БІБЛІОТЕКА FUTURE SPHERE", listingDescription: "Останні матеріали про нові моделі, AI-інструменти, дослідження та технології з посиланнями на першоджерела.",
     demoLabel: "Демонстраційна стрічка", searchIntro: "Знайдіть матеріали про моделі, інструменти та дослідження штучного інтелекту.",
     searchPlaceholder: "Наприклад, AI-моделі або дослідження...", searchButton: "Шукати", searchResults: "Результати для", noResults: "Нічого не знайдено. Спробуйте інший запит або перегляньте",
     searchHint: "Почніть із назви теми або ключового слова.", readArticle: "Читати матеріал", demoArticle: "ДЕМО-МАТЕРІАЛ",
@@ -25,11 +25,11 @@ const ui = {
     backHome: "← Повернутися до стрічки", continueReading: "ПРОДОВЖИТИ ЧИТАТИ", moreFrom: "Ще у Future Sphere",
     categoryKicker: "РУБРИКА FUTURE SPHERE", emptyCategory: "У цій рубриці поки немає матеріалів.",
     aboutKicker: "ПРО FUTURE SPHERE", aboutTitleA: "Технології змінюються швидко.", aboutTitleB: "Розуміння має встигати.",
-    aboutIntro: "Future Sphere — майбутній незалежний інформаційний простір про штучний інтелект. Ми прагнемо збирати важливі оновлення в одному місці й пояснювати, що вони означають на практиці.",
+    aboutIntro: "Future Sphere — незалежний інформаційний простір про штучний інтелект. Ми збираємо важливі оновлення в одному місці й пояснюємо, що вони означають на практиці.",
     principles: [
       ["01 / ВІДБІР","Важливе, а не просто гучне","Фокус на значущих запусках, дослідженнях, інструментах і змінах у сфері AI. Менше повторів і другорядних анонсів."],
       ["02 / КОНТЕКСТ","Не лише що сталося","Пояснювати, чому новина важлива, кому стане у пригоді та які обмеження варто враховувати."],
-      ["03 / ДЖЕРЕЛА","Прозорість і перевірка","У робочій версії публікації матимуть посилання на першоджерела, дати та чітке розділення фактів і редакційних пояснень."]
+      ["03 / ДЖЕРЕЛА","Прозорість і перевірка","Матеріали містять посилання на першоджерела й дати публікації, щоб читачі могли перевірити контекст самостійно."]
     ],
     development: "ЗАРАЗ МИ НА ЕТАПІ РОЗРОБКИ", prototype: "Цей сайт поки що є прототипом. Тексти на головній сторінці та в матеріалах демонстраційні й не є стрічкою актуальних новин.",
     viewMaterials: "Переглянути матеріали", notFound: "Ця сторінка поза орбітою.", notFoundText: "Схоже, такого матеріалу поки немає або посилання змінилося.", goHome: "На головну",
@@ -46,7 +46,7 @@ const ui = {
     search: "Search", home: "Home", allNews: "All stories", about: "About",
     heroEyebrow: "THE AI BRIEFING", heroTitleA: "The future is", heroTitleB: "already happening.",
     heroText: "What matters in artificial intelligence. Less noise, more context, clear explanations and ideas.",
-    explore: "Explore AI", howItWorks: "Our approach", editorPick: "EDITOR'S PICK · DEMO", read: "Read story",
+    explore: "Explore AI", howItWorks: "Our approach", editorPick: "EDITOR'S PICK", read: "Read story",
     navigation: "EXPLORE", worthKnowing: "WORTH KNOWING", ideas: "Ideas shaping tomorrow", allMaterials: "All stories",
     freshView: "A FRESH PERSPECTIVE", latest: "Latest stories", demoFeed: "Demo feed",
     lessNoise: "Less noise.", moreUnderstanding: "More understanding.", editorialText: "We explain not only what happened, but why it matters.",
@@ -54,7 +54,7 @@ const ui = {
     newModels: "New AI models", aiTools: "AI tools", openResearch: "Open research", newTech: "Emerging technology",
     manifestoTitle: "Understand technology.", manifestoSub: "See the possibilities.", manifestoText: "A place where complex technology becomes easier to understand and important discoveries don't get lost in the information stream.",
     footerNote: "Tomorrow's technology, understood today.", footerNews: "All news", footerAbout: "About the project", footerTagline: "An independent view of AI",
-    library: "THE FUTURE SPHERE LIBRARY", listingDescription: "Stories about new models, AI tools, research and technology. These are demonstration articles for now.",
+    library: "THE FUTURE SPHERE LIBRARY", listingDescription: "The latest stories about AI models, tools, research and technology, with links to original sources.",
     demoLabel: "Demo feed", searchIntro: "Find stories about AI models, tools and research.",
     searchPlaceholder: "For example, AI models or research...", searchButton: "Search", searchResults: "Results for", noResults: "No results found. Try another search or browse",
     searchHint: "Start with a topic or keyword.", readArticle: "Read story", demoArticle: "DEMO ARTICLE",
@@ -63,11 +63,11 @@ const ui = {
     backHome: "← Back to the news feed", continueReading: "KEEP READING", moreFrom: "More from Future Sphere",
     categoryKicker: "FUTURE SPHERE TOPIC", emptyCategory: "There are no stories in this topic yet.",
     aboutKicker: "ABOUT FUTURE SPHERE", aboutTitleA: "Technology moves fast.", aboutTitleB: "Understanding should keep up.",
-    aboutIntro: "Future Sphere is an upcoming independent publication about artificial intelligence. Our goal is to bring important updates together and explain what they mean in practice.",
+    aboutIntro: "Future Sphere is an independent publication about artificial intelligence. We bring important updates together and explain what they mean in practice.",
     principles: [
       ["01 / SELECTION","What matters, not just what makes noise","We focus on meaningful launches, research, tools and shifts in AI. Less repetition and fewer minor announcements."],
       ["02 / CONTEXT","More than what happened","We explain why a story matters, who it may help and which limitations are worth keeping in mind."],
-      ["03 / SOURCES","Transparency and verification","The live publication will link to original sources, include dates and clearly distinguish facts from editorial explanation."]
+      ["03 / SOURCES","Transparency and verification","Stories include links to original sources and publication dates so readers can check the context for themselves."]
     ],
     development: "CURRENTLY IN DEVELOPMENT", prototype: "This website is still a prototype. Homepage copy and articles are examples, not a feed of current news.",
     viewMaterials: "Browse demo stories", notFound: "This page is off the radar.", notFoundText: "This story may not exist yet, or the link may have changed.", goHome: "Go home",
