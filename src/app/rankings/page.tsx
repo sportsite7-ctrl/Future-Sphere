@@ -28,7 +28,7 @@ export default async function RankingsPage() {
 
   const [modelsQuery, benchmarksQuery, resultsQuery] = await Promise.all([
     supabase.from("ai_models").select("id,slug,name,provider,official_url").eq("is_published", true),
-    supabase.from("ai_benchmarks").select("id,slug,name,category,methodology_url,leaderboard_url,higher_is_better").eq("is_published", true),
+    supabase.from("ai_benchmarks").select("id,slug,name,category,description,methodology_url,leaderboard_url,higher_is_better").eq("is_published", true),
     supabase.from("ai_benchmark_results").select("id,model_id,benchmark_id,score,score_unit,evaluation_date,evaluation_version,harness,sample_size,evidence_grade,notes").eq("is_published", true).order("evaluation_date", { ascending: false }),
   ]);
 
@@ -104,6 +104,9 @@ export default async function RankingsPage() {
     noSample: "Not disclosed",
     benchmarkSource: "Benchmark methodology",
     checked: "Source checked",
+    directoryTitle: "Benchmarks we track",
+    directoryText: "These are separate evaluation systems, not one combined ranking. Open each source to inspect its current release and methodology.",
+    caution: "Important caveat",
   } : {
     kicker: "ПРОЗОРІ БЕНЧМАРКИ",
     title: "Рейтинги AI-моделей",
@@ -127,6 +130,9 @@ export default async function RankingsPage() {
     noSample: "Не вказано",
     benchmarkSource: "Методологія тесту",
     checked: "Джерело перевірено",
+    directoryTitle: "Бенчмарки, за якими ми стежимо",
+    directoryText: "Це окремі системи оцінювання, а не один спільний рейтинг. Відкривайте першоджерела, щоб перевіряти актуальну версію та методологію.",
+    caution: "Важливе застереження",
   };
 
   return (
@@ -178,6 +184,33 @@ export default async function RankingsPage() {
             </section>
           ))}
         </div>
+      )}
+
+      {!unavailable && benchmarks.length > 0 && (
+        <section className="ranking-directory">
+          <div className="ranking-directory-heading">
+            <h2>{text.directoryTitle}</h2>
+            <p>{text.directoryText}</p>
+          </div>
+          <div className="ranking-directory-grid">
+            {benchmarks.map((benchmark) => (
+              <article className="ranking-directory-card" key={benchmark.id}>
+                <span className="ranking-category">{benchmark.category}</span>
+                <h3>{benchmark.name}</h3>
+                <p>{benchmark.description}</p>
+                {benchmark.slug === "swe-bench-verified" && (
+                  <p className="ranking-caution">{text.caution}: {en
+                    ? "Independent reviews have raised concerns about contamination and test validity. We will show its results separately and with this context."
+                    : "Незалежні огляди вказували на ризик витоку завдань і проблеми валідності тестів. Результати показуватимемо окремо й з цим контекстом."}</p>
+                )}
+                <div className="ranking-directory-links">
+                  <a href={benchmark.methodology_url} target="_blank" rel="noreferrer">{text.benchmarkSource} ↗</a>
+                  {benchmark.leaderboard_url && <a href={benchmark.leaderboard_url} target="_blank" rel="noreferrer">{en ? "Leaderboard" : "Таблиця результатів"} ↗</a>}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       )}
 
       <section className="ranking-methodology">
