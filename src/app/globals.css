@@ -321,3 +321,17 @@ body{background:var(--paper);color:var(--ink);font-family:"DM Sans","Onest",Aria
 .ranking-directory-links{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px}
 .ranking-directory-links a{color:#557f9c;font-size:10px;font-weight:700}
 @media(max-width:700px){.ranking-directory-grid{grid-template-columns:1fr}.ranking-directory-card{padding:18px}}
+
+
+/* Model directory cards on the benchmark page */
+.ranking-model-directory{margin:42px 0 8px}
+.ranking-model-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.ranking-model-card{padding:19px;border:1px solid #e2e9e9;border-radius:9px;background:#fff}
+.ranking-model-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ranking-model-date{color:#98a5ad;font-size:9px;white-space:nowrap}
+.ranking-model-card h3{margin:12px 0 6px;font-family:Manrope,sans-serif;font-size:17px;letter-spacing:-.02em}
+.ranking-model-card h3 a{color:#315f80}
+.ranking-model-card>p{min-height:32px;margin:0;color:#788790;font-size:10px;line-height:1.65}
+.ranking-provider-note{display:inline-block;margin-top:13px;padding:5px 8px;border-radius:4px;background:#f2f6f8;color:#6d8798;font-size:9px;font-weight:700}
+@media(max-width:900px){.ranking-model-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.ranking-model-grid{grid-template-columns:1fr}.ranking-model-card{padding:17px}}
