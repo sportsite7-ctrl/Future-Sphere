@@ -58,7 +58,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     description: story.seoDescription || story.excerpt,
     image: [story.image],
     datePublished: story.publishedAt,
-    dateModified: story.publishedAt,
     inLanguage: locale === "uk" ? "uk-UA" : "en",
     mainEntityOfPage: canonical,
     author: { "@type": "Organization", name: "Future Sphere Editorial Team" },
