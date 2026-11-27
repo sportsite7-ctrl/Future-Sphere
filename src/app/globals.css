@@ -306,3 +306,18 @@ body{background:var(--paper);color:var(--ink);font-family:"DM Sans","Onest",Aria
  .ranking-table th,.ranking-table td{padding:12px 10px}
  .ranking-empty{padding:30px 18px}
 }
+
+
+/* Verified benchmark directory */
+.ranking-directory{margin-top:48px}
+.ranking-directory-heading{margin-bottom:18px}
+.ranking-directory-heading h2{margin:0 0 8px;font-family:Manrope,sans-serif;font-size:22px}
+.ranking-directory-heading p{max-width:760px;margin:0;color:#7b8991;font-size:12px;line-height:1.8}
+.ranking-directory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.ranking-directory-card{padding:21px;border:1px solid #e2e9e9;border-radius:9px;background:#fff}
+.ranking-directory-card h3{margin:8px 0;font-family:Manrope,sans-serif;font-size:17px;letter-spacing:-.02em}
+.ranking-directory-card>p{margin:0;color:#788790;font-size:11px;line-height:1.75}
+.ranking-directory-card .ranking-caution{margin-top:10px;padding:10px 12px;border-left:2px solid #d8aa72;background:#fbf7f0;color:#78684f}
+.ranking-directory-links{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px}
+.ranking-directory-links a{color:#557f9c;font-size:10px;font-weight:700}
+@media(max-width:700px){.ranking-directory-grid{grid-template-columns:1fr}.ranking-directory-card{padding:18px}}
