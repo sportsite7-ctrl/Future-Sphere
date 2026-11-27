@@ -42,27 +42,32 @@ const editorialImageSets: Record<string, EditorialImage> = {
 function fallbackForArticle(sourceUrl: string | null, title: string, categorySlug: string): EditorialImage {
   const source = (sourceUrl || "").toLowerCase();
   const headline = title.toLowerCase();
-  const text = `${source} ${headline}`;
+  const text = `${headline} ${source}`;
 
-  // Specific physical subjects take priority over company names.
-  if (/robotics|humanoid|robot\b|робототех|гуманоїд|робот\b|автоматизац/.test(text)) return editorialImageSets.robotics;
-  if (/gpu|chipset|semiconductor|processor|hardware|microchip|чип|процесор|напівпровідник|відеокарт|графічн.*процесор/.test(text)) return editorialImageSets.chips;
-  if (/data cent(?:er|re)|datacenter|server farm|cloud infrastructure|дата.?центр|серверн.*інфраструктур|хмарн.*інфраструктур/.test(text)) return editorialImageSets.infrastructure;
-  if (/ai tool|ai assistant app|software tool|developer tool|coding assistant|платформ.*інструмент|інструмент.*ш[іi]|застосунок|програмн.*засіб/.test(text)) return editorialImageSets.tools;
+  // Classify the actual subject of the article before looking at its publisher.
+  // This is important because one RSS publisher (e.g. OpenAI) publishes many
+  // different kinds of stories: models, apps, coding, hardware and research.
+  if (/robotics|humanoid|robot\b|робототех|гуманоїд|робот\b|автоматизац/.test(headline)) return editorialImageSets.robotics;
+  if (/gpu|chipset|semiconductor|processor|hardware|microchip|чип|процесор|напівпровідник|відеокарт|графічн.*процесор/.test(headline)) return editorialImageSets.chips;
+  if (/data cent(?:er|re)|datacenter|server farm|cloud infrastructure|дата.?центр|серверн.*інфраструктур|хмарн.*інфраструктур/.test(headline)) return editorialImageSets.infrastructure;
+  if (/api|developer|coding|programming|code assistant|software|app launch|product launch|agent platform|інструмент|застосунок|програм|код|розробник|агент/.test(headline)) return editorialImageSets.tools;
 
-  // Brand-specific matches prevent a generic "AI" word from winning first.
-  if (/google|gemini|deepmind|blog\.google/.test(text)) return editorialImageSets.gemini;
-  if (/openai|chatgpt|sora|gpt[- ]?[0-9]|openai\.com/.test(text)) return editorialImageSets.ai;
-  if (/anthropic|claude|\bsonnet\b|\bopus\b/.test(text)) return editorialImageSets.ai;
-  if (/hugging.?face|hf\.co/.test(text)) return editorialImageSets.tools;
+  // Company-specific editorial visuals are selected only when the headline
+  // actually concerns that company's model/product, not merely its RSS domain.
+  if (/google|gemini|deepmind/.test(headline)) return editorialImageSets.gemini;
+  if (/openai|chatgpt|sora|gpt[- ]?[0-9]/.test(headline)) return editorialImageSets.ai;
+  if (/anthropic|claude|\bsonnet\b|\bopus\b/.test(headline)) return editorialImageSets.ai;
+  if (/hugging.?face/.test(headline)) return editorialImageSets.ai;
 
-  // Use the article's editorial category only as a fallback, not as the
-  // primary classifier. Research/model announcements should not become chip photos.
+  // A publisher URL is a weak signal, used only after the headline.
+  if (/huggingface|hf\.co/.test(source) && categorySlug === "tools") return editorialImageSets.tools;
+  if (/google|deepmind/.test(source)) return editorialImageSets.gemini;
+  if (/openai|anthropic/.test(source)) return editorialImageSets.ai;
+
   if (categorySlug === "tools") return editorialImageSets.tools;
   if (categorySlug === "industry") return editorialImageSets.infrastructure;
-  if (categorySlug === "research" || categorySlug === "ai-models") return editorialImageSets.ai;
+  if (categorySlug === "research") return editorialImageSets.ai;
   if (categorySlug === "technology") return editorialImageSets.infrastructure;
-
   return editorialImageSets.ai;
 }
 
