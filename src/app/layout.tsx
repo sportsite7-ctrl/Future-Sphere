@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   verification: { google: "OzXopRCsAITVXAZ6F-izhB34Tjtq5fOv_9E5dxB13PA" },
+  metadataBase: new URL("https://future-sphere-henna.vercel.app"),
   title: { default: "Future Sphere — AI news and insights", template: "%s | Future Sphere" },
   description: "News, research and clear explanations about artificial intelligence and emerging technology.",
   applicationName: "Future Sphere",
@@ -22,7 +23,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={locale}>
       <body>
-        <div className="demo-ribbon"><span>{locale === "en" ? "PROTOTYPE" : "ПРОТОТИП"}</span> {copy.prototype}</div>
         <SiteHeader locale={locale} />
         <main>{children}</main>
         <SiteFooter locale={locale} />
