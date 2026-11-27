@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { NewsCard } from "@/components/news-card";
 import { NewsImage } from "@/components/news-image";
@@ -7,6 +8,17 @@ import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/i18n";
 import { localizeStory } from "@/lib/i18n";
 import { Pagination } from "@/components/pagination";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return {
+    title: locale === "en" ? "AI News, Research & Tools" : "Новини ШІ, дослідження та інструменти",
+    description: locale === "en"
+      ? "Follow the latest AI news, model releases, research and tools with context and links to original sources."
+      : "Останні новини штучного інтелекту, нові моделі, дослідження та інструменти з поясненнями й посиланнями на першоджерела.",
+    alternates: { canonical: "/" },
+  };
+}
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const locale = await getLocale();
