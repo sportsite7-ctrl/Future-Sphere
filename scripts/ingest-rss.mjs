@@ -71,7 +71,7 @@ function extractImage(item) {
     typeof url === "string" &&
     validHttpUrl(url) &&
     (String(type || "").toLowerCase().startsWith("image") ||
-      (!type && /\\.(avif|gif|jpe?g|png|webp)(?:[?#]|$)/i.test(url)))
+      (!type && /\.(avif|gif|jpe?g|png|webp)(?:[?#]|$)/i.test(url)))
   );
   return match?.url || null;
 }
@@ -215,12 +215,12 @@ async function findOrCreateSource(feedConfig) {
 
 async function findOrCreateArticle({ link, sourceId, categoryId, publishedAt, imageUrl, imageAlt, sourceName }) {
   const { data: existing, error: lookupError } = await supabase.from("articles")
-    .select("id,status,category_id,image_url")
+    .select("id,status,category_id,image_url,image_source_url")
     .eq("source_url", link)
     .maybeSingle();
   if (lookupError) throw lookupError;
   if (existing) {
-    if (imageUrl && !existing.image_url) {
+    if (imageUrl && existing.image_url !== imageUrl) {
       const { error: imageUpdateError } = await supabase.from("articles").update({
         image_url: imageUrl,
         image_alt: imageAlt,
