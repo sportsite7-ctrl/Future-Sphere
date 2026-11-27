@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "News, research and clear explanations about artificial intelligence and emerging technology.",
   applicationName: "Future Sphere",
   openGraph: { title: "Future Sphere", description: "Tomorrow's technology, understood today.", type: "website" },
-  robots: { index: false, follow: false }
+  robots: { index: true, follow: true }
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
