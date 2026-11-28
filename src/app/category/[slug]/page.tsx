@@ -11,12 +11,13 @@ export async function generateStaticParams() { return []; }
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const locale = await getLocale();
-  const category = (await getCategories(locale)).find((item) => item.slug === slug);
+  const [category, stories] = await Promise.all([(async () => (await getCategories(locale)).find((item) => item.slug === slug))(), getStories(locale)]);
   if (!category) return { robots: { index: false, follow: true } };
   return {
     title: locale === "en" ? category.name + " — AI News & Insights" : category.name + " — новини та огляди",
     description: category.description,
-    alternates: { canonical: localeUrl(locale, "/category/" + slug), languages: { "uk-UA": localeUrl("uk", "/category/" + slug), "en-US": localeUrl("en", "/category/" + slug) } }, 
+    alternates: { canonical: localeUrl(locale, "/category/" + slug), languages: { "uk-UA": localeUrl("uk", "/category/" + slug), "en-US": localeUrl("en", "/category/" + slug) } },
+    robots: stories.some((story) => story.categorySlug === slug && !story.isDemo) ? { index: true, follow: true } : { index: false, follow: true },
   };
 }
 
