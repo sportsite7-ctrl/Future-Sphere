@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { NewsCard } from "@/components/news-card";
 import { NewsImage } from "@/components/news-image";
 import { getStories } from "@/lib/content";
-import { getLocale } from "@/lib/locale";
+import { getLocale, localeUrl } from "@/lib/locale";
 import { t, localizeStory } from "@/lib/i18n";
 
 export async function generateStaticParams() { return []; }
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const localized = localizeStory(story, locale);
   const title = localized.seoTitle || localized.title;
   const description = localized.seoDescription || localized.excerpt;
-  const canonical = `https://future-sphere-henna.vercel.app/article/${slug}`;
+  const canonical = localeUrl(locale, `/article/${slug}`);
   return {
     title,
     description,
@@ -45,6 +45,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const locale = await getLocale();
   const copy = t(locale);
+  const pathFor = (path: string) => `/${locale}${path === "/" ? "" : path}`;
   const stories = await getStories(locale);
   const original = stories.find((item) => item.slug === slug);
   if (!original) notFound();
@@ -70,7 +71,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />}
-      <div className="article-breadcrumb"><Link href="/">{copy.home}</Link><span>/</span><Link href={`/category/${story.categorySlug}`}>{story.category}</Link><span>/</span><span>{copy.readArticle}</span></div>
+      <div className="article-breadcrumb"><Link href={pathFor("/")}>{copy.home}</Link><span>/</span><Link href={pathFor(`/category/${story.categorySlug}`)}>{story.category}</Link><span>/</span><span>{copy.readArticle}</span></div>
       <header className="article-header"><span className="article-category">{story.category}{story.isDemo ? ` · ${copy.demoArticle}` : ""}</span><h1>{story.title}</h1><p className="article-deck">{story.excerpt}</p>
         <div className="article-byline"><span className="byline-avatar">FS</span><span><b>{copy.editor}</b><small>{story.date} · {story.readTime}</small></span></div>
       </header>
