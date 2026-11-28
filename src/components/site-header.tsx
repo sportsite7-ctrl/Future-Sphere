@@ -23,7 +23,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
   ];
   function changeLocale(next: Locale) {
     if (next === locale) return;
-    const target = `/${next}${currentPath === "/" ? "" : currentPath}`;
+    const target = `/${next}`;
     window.location.assign(target);
   }
   return (
