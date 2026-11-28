@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getCategories("uk"), getCategories("en"), getStories("uk"), getStories("en")
   ]);
   const pages: MetadataRoute.Sitemap = [];
-  for (const path of ["/", "/news", "/about", "/rankings"]) {
+  for (const path of ["/", "/news", "/about"]) {
     pages.push({
       url: localized("uk", path),
       changeFrequency: path === "/" || path === "/news" ? "daily" : "weekly",
