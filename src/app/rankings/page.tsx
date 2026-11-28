@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getLocale } from "@/lib/locale";
+import { getLocale, localeUrl } from "@/lib/locale";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +10,8 @@ export async function generateMetadata(): Promise<Metadata> {
     description: locale === "en"
       ? "Clear, task-based rankings of AI assistants, coding models, image generators and video generators, with links to the original leaderboards."
       : "Зрозумілі рейтинги ШІ для повсякденних завдань, програмування, створення зображень і відео з посиланнями на першоджерела.",
+    alternates: { canonical: localeUrl(locale, "/rankings"), languages: { "uk-UA": localeUrl("uk", "/rankings"), "en-US": localeUrl("en", "/rankings") } },
+    robots: { index: false, follow: true },
   };
 }
 
