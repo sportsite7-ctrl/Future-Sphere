@@ -124,8 +124,7 @@ export async function getStories(locale: Locale): Promise<Story[]> {
 
       for (const article of articles) {
         const candidates = translationRows.filter((item) => item.article_id === article.id);
-        const translation = candidates.find((item) => item.lang === locale)
-          ?? candidates.find((item) => item.lang === (locale === "uk" ? "en" : "uk"));
+        const translation = candidates.find((item) => item.lang === locale);
         if (!translation?.slug || !translation.title) continue;
 
         const category = categoryById.get(article.category_id);
