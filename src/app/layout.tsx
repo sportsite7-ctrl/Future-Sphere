@@ -21,7 +21,6 @@ export const metadata: Metadata = {
     title: "Future Sphere — AI news and insights",
     description: "News, research and clear explanations about artificial intelligence and emerging technology.",
     type: "website",
-    url: "https://future-sphere-henna.vercel.app",
     siteName: "Future Sphere"
   },
   robots: { index: true, follow: true }
