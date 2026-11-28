@@ -172,7 +172,7 @@ export async function getStories(locale: Locale): Promise<Story[]> {
           isFeatured: article.is_featured ?? false,
         } as Story);
       }
-      return result;
+      if (result.length) return result;
     }
   } catch (error) {
     console.error("Future Sphere articles query failed; using demo content:", error);
