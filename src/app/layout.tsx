@@ -13,9 +13,9 @@ export const metadata: Metadata = {
   description: "News, research and clear explanations about artificial intelligence and emerging technology.",
   applicationName: "Future Sphere",
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: ["/icon.svg"],
-    apple: [{ url: "/icon.svg", type: "image/svg+xml" }]
+    icon: [{ url: "/favicon.png", type: "image/png", sizes: "192x192" }],
+    shortcut: ["/favicon.png"],
+    apple: [{ url: "/favicon.png", type: "image/png", sizes: "192x192" }]
   },
   openGraph: { title: "Future Sphere — AI news and insights", description: "News, research and clear explanations about artificial intelligence and emerging technology.", type: "website", url: "https://future-sphere-henna.vercel.app", siteName: "Future Sphere" },
   robots: { index: true, follow: true }
