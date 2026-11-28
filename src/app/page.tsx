@@ -4,7 +4,7 @@ import { NewsCard } from "@/components/news-card";
 import { NewsImage } from "@/components/news-image";
 import { BrandSymbol } from "@/components/brand-symbol";
 import { getCategories, getStories } from "@/lib/content";
-import { getLocale } from "@/lib/locale";
+import { getLocale, localeUrl } from "@/lib/locale";
 import { t } from "@/lib/i18n";
 import { localizeStory } from "@/lib/i18n";
 import { Pagination } from "@/components/pagination";
@@ -16,13 +16,14 @@ export async function generateMetadata(): Promise<Metadata> {
     description: locale === "en"
       ? "Follow the latest AI news, model releases, research and tools with context and links to original sources."
       : "Останні новини штучного інтелекту, нові моделі, дослідження та інструменти з поясненнями й посиланнями на першоджерела.",
-    alternates: { canonical: "/" },
+    alternates: { canonical: localeUrl(locale, "/"), languages: { "uk-UA": localeUrl("uk", "/"), "en-US": localeUrl("en", "/") } },
   };
 }
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const locale = await getLocale();
   const copy = t(locale);
+  const pathFor = (path: string) => `/${locale}${path === "/" ? "" : path}`;
   const [{ page: pageParam }, stories, categories] = await Promise.all([searchParams, getStories(locale), getCategories(locale)]);
   const orderedStories = [...stories].sort((a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)));
   const pageSize = 5;
@@ -49,9 +50,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className="eyebrow"><span className="eyebrow-dot" /> {copy.heroEyebrow} <span className="eyebrow-line" /> {lead.date}</div>
           <h1>{copy.heroTitleA} <span>{copy.heroTitleB}</span></h1>
           <p>{copy.heroText}</p>
-          <div className="hero-actions"><Link href="/category/ai-models" className="button-primary">{copy.explore} <span>↗</span></Link><Link href="/about" className="button-quiet">{copy.howItWorks} <span>→</span></Link></div>
+          <div className="hero-actions"><Link href={pathFor("/category/ai-models")} className="button-primary">{copy.explore} <span>↗</span></Link><Link href={pathFor("/about")} className="button-quiet">{copy.howItWorks} <span>→</span></Link></div>
         </div>
-        <Link href={`/article/${lead.slug}`} className="lead-story">
+        <Link href={pathFor(`/article/${lead.slug}`)} className="lead-story">
           <NewsImage src={lead.image} alt={lead.imageAlt} className="lead-image" priority /><div className="lead-overlay" />
           <div className="lead-content">
             <div className="lead-topline"><span className="lead-label">{copy.editorPick}</span><span>{lead.readTime}</span></div>
@@ -60,10 +61,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </Link>
       </section>
       <section className="category-strip page-shell"><div className="section-kicker">{copy.navigation}</div><div className="category-pills">
-        {categories.map((category) => <Link key={category.slug} href={`/category/${category.slug}`} className="category-pill">{category.name}<span>↗</span></Link>)}
+        {categories.map((category) => <Link key={category.slug} href={pathFor(`/category/${category.slug}`)} className="category-pill">{category.name}<span>↗</span></Link>)}
       </div></section>
       <section className="content-section page-shell">
-        <div className="section-heading"><div><div className="section-kicker">{copy.worthKnowing}</div><h2>{copy.ideas}<span>.</span></h2></div><Link href="/news" className="view-all">{copy.allMaterials} <span>↗</span></Link></div>
+        <div className="section-heading"><div><div className="section-kicker">{copy.worthKnowing}</div><h2>{copy.ideas}<span>.</span></h2></div><Link href={pathFor("/news")} className="view-all">{copy.allMaterials} <span>↗</span></Link></div>
         <div className="feature-grid">{secondary.map((story) => <NewsCard key={story.slug} story={story} locale={locale} />)}</div>
       </section>
       <section className="latest-section"><div className="page-shell latest-layout">
@@ -74,7 +75,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
         <aside className="editorial-aside">
           <div className="aside-card aside-note"><span className="aside-number">01 / {locale === "en" ? "PRINCIPLE" : "ПРИНЦИП"}</span><div className="aside-orbit"><span /><i /><b /></div><h3>{copy.lessNoise}<br />{copy.moreUnderstanding}</h3><p>{copy.editorialText}</p><Link href="/about" className="text-link">{copy.editorialApproach} <span>↗</span></Link></div>
-          <div className="aside-card aside-topics"><span className="aside-number">{copy.focus}</span><h3>{copy.focusTitle}</h3><ul><li><Link href="/category/ai-models">{copy.newModels} <span>↗</span></Link></li><li><Link href="/category/tools">{copy.aiTools} <span>↗</span></Link></li><li><Link href="/category/research">{copy.openResearch} <span>↗</span></Link></li><li><Link href="/category/technology">{copy.newTech} <span>↗</span></Link></li></ul></div>
+          <div className="aside-card aside-topics"><span className="aside-number">{copy.focus}</span><h3>{copy.focusTitle}</h3><ul><li><Link href="/category/ai-models">{copy.newModels} <span>↗</span></Link></li><li><Link href={pathFor("/category/tools")}>{copy.aiTools} <span>↗</span></Link></li><li><Link href={pathFor("/category/research")}>{copy.openResearch} <span>↗</span></Link></li><li><Link href={pathFor("/category/technology")}>{copy.newTech} <span>↗</span></Link></li></ul></div>
         </aside>
       </div></section>
       <section className="manifesto page-shell"><div className="manifesto-mark"><BrandSymbol large /></div><div><div className="section-kicker">FUTURE SPHERE</div><h2>{copy.manifestoTitle}<br /><span>{copy.manifestoSub}</span></h2></div><p>{copy.manifestoText}</p></section>
