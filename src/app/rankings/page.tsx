@@ -1,261 +1,217 @@
 import type { Metadata } from "next";
 import { getLocale } from "@/lib/locale";
-import { supabase } from "@/lib/supabase";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   return {
-    title: locale === "en" ? "AI Model Rankings" : "Рейтинги AI-моделей",
+    title: locale === "en" ? "AI Rankings — Find the Best AI for Your Task" : "Рейтинги ШІ — оберіть найкращий для свого завдання",
     description: locale === "en"
-      ? "Evidence-backed AI model benchmark results, with methodology, evaluation setup and original sources."
-      : "Результати тестування AI-моделей із методологією, умовами оцінювання та посиланнями на першоджерела.",
+      ? "Clear, task-based rankings of AI assistants, coding models, image generators and video generators, with links to the original leaderboards."
+      : "Зрозумілі рейтинги ШІ для повсякденних завдань, програмування, створення зображень і відео з посиланнями на першоджерела.",
   };
 }
 
-type Row = Record<string, any>;
+type Entry = { name: string; provider: string; score: string; detail?: string };
+type Ranking = {
+  title: string;
+  description: string;
+  sourceName: string;
+  sourceUrl: string;
+  updated: string;
+  metric: string;
+  entries: Entry[];
+  caveat?: string;
+};
+
+const rankings: Ranking[] = [
+  {
+    title: "Overall AI capabilities",
+    description: "A broad comparison of reasoning, knowledge, coding and everyday work. This is the closest thing to an all-round score — it is not a dedicated image or video ranking.",
+    sourceName: "Artificial Analysis Intelligence Index v5.0.2",
+    sourceUrl: "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index",
+    updated: "28 Nov 2026",
+    metric: "Index score · higher is better",
+    entries: [
+      { name: "Claude Fable 5.2", provider: "Anthropic", score: "65", detail: "Max configuration" },
+      { name: "Claude Fable 5.2", provider: "Anthropic", score: "62", detail: "Xhigh configuration" },
+      { name: "GPT-6.2 Astra", provider: "OpenAI", score: "62", detail: "Max configuration" },
+      { name: "Claude Fable 5.2", provider: "Anthropic", score: "62", detail: "High configuration" },
+      { name: "GPT-6.2 Astra", provider: "OpenAI", score: "62", detail: "Xhigh configuration" },
+    ],
+    caveat: "The same model can appear more than once when different settings are tested. These are benchmark configurations, not five different AI products.",
+  },
+  {
+    title: "Text, writing & everyday chat",
+    description: "Which AI gives people the most preferred answers in ordinary conversations, explanations and writing tasks.",
+    sourceName: "Arena Text Leaderboard",
+    sourceUrl: "https://arena.ai/leaderboard/chat/text",
+    updated: "22 Nov 2026",
+    metric: "Arena rating · higher is better",
+    entries: [
+      { name: "Gemini 4 Carbon", provider: "Google", score: "1,527", detail: "High" },
+      { name: "Gemini 4 Argon", provider: "Google", score: "1,520", detail: "High" },
+      { name: "Gemini 4 Neon", provider: "Google", score: "—", detail: "xHigh · rank 3" },
+      { name: "Muse Wonder", provider: "Meta", score: "—", detail: "Max · rank 4" },
+      { name: "Claude Opus 5.5", provider: "Anthropic", score: "—", detail: "High · rank 5" },
+    ],
+    caveat: "The source shows the exact rating for the leader and ranks for the remaining entries. We do not fill in ratings that were not disclosed in the captured source.",
+  },
+  {
+    title: "Programming & coding",
+    description: "Models compared on practical coding tasks, including building web apps and working with code.",
+    sourceName: "Arena Code / WebDev Leaderboard",
+    sourceUrl: "https://arena.ai/leaderboard/code/webdev",
+    updated: "22 Nov 2026",
+    metric: "Arena rating · higher is better",
+    entries: [
+      { name: "Claude Fable 5.2", provider: "Anthropic", score: "1,822", detail: "xHigh" },
+      { name: "Claude Opus 5.5", provider: "Anthropic", score: "1,820", detail: "Max" },
+      { name: "Claude Sonnet 5.5", provider: "Anthropic", score: "1,772", detail: "xHigh" },
+      { name: "Gemini 4 Carbon", provider: "Google", score: "1,769", detail: "High" },
+      { name: "Gemini 4 Neon", provider: "Google", score: "—", detail: "High · rank 5" },
+    ],
+    caveat: "This board focuses on building web apps. It is a practical coding comparison, not a test of every possible programming language or workflow.",
+  },
+  {
+    title: "Image generation",
+    description: "Which models create images that people prefer when given the same text prompt.",
+    sourceName: "Artificial Analysis Image Arena v2.1",
+    sourceUrl: "https://artificialanalysis.ai/image/leaderboard/text-to-image",
+    updated: "28 Nov 2026",
+    metric: "Elo rating · higher is better",
+    entries: [
+      { name: "GPT Image 2.6 Sunburst", provider: "OpenAI", score: "1,266" },
+      { name: "GPT Image 2.5 Sunburst", provider: "OpenAI", score: "1,230" },
+      { name: "GPT Image 2.6 Flare", provider: "OpenAI", score: "1,227" },
+      { name: "MAI-Image-2.7", provider: "Microsoft", score: "1,216" },
+      { name: "GPT Image 2.5 Flare", provider: "OpenAI", score: "1,212" },
+    ],
+    caveat: "This ranking is for generating an image from text. Image editing is measured separately.",
+  },
+  {
+    title: "Video generation",
+    description: "Which models produce the most preferred videos from text prompts.",
+    sourceName: "Artificial Analysis Text-to-Video v2.1",
+    sourceUrl: "https://artificialanalysis.ai/video/leaderboard/text-to-video",
+    updated: "26 Nov 2026",
+    metric: "Elo rating · higher is better",
+    entries: [
+      { name: "Wan 3.0", provider: "Alibaba", score: "1,175" },
+      { name: "Utopai X", provider: "Utopai Studios", score: "1,173" },
+      { name: "MiniMax H3", provider: "MiniMax", score: "1,164", detail: "768p" },
+      { name: "Hyperflow H3", provider: "Video Rebirth", score: "1,156" },
+      { name: "Dreamina Seedance 2.5", provider: "ByteDance", score: "1,154" },
+    ],
+    caveat: "This board measures text-to-video generation. Image-to-video has a separate leaderboard.",
+  },
+];
 
 export default async function RankingsPage() {
   const locale = await getLocale();
   const en = locale === "en";
-  let models: Row[] = [];
-  let benchmarks: Row[] = [];
-  let results: Row[] = [];
-  let evidence: Row[] = [];
-  let unavailable = false;
-
-  const [modelsQuery, benchmarksQuery, resultsQuery] = await Promise.all([
-    supabase.from("ai_models").select("id,slug,name,provider,model_family,release_date,official_url,model_type").eq("is_published", true),
-    supabase.from("ai_benchmarks").select("id,slug,name,category,description,methodology_url,leaderboard_url,higher_is_better").eq("is_published", true),
-    supabase.from("ai_benchmark_results").select("id,model_id,benchmark_id,score,score_unit,evaluation_date,evaluation_version,harness,sample_size,evidence_grade,notes").eq("is_published", true).order("evaluation_date", { ascending: false }),
-  ]);
-
-  if (modelsQuery.error || benchmarksQuery.error || resultsQuery.error) {
-    unavailable = true;
-  } else {
-    models = (modelsQuery.data ?? []) as Row[];
-    benchmarks = (benchmarksQuery.data ?? []) as Row[];
-    results = (resultsQuery.data ?? []) as Row[];
-    if (results.length) {
-      const evidenceQuery = await supabase.from("ai_benchmark_evidence")
-        .select("id,result_id,source_title,source_url,source_type,published_at,checked_at,notes")
-        .in("result_id", results.map((row) => row.id));
-      if (evidenceQuery.error) unavailable = true;
-      else evidence = (evidenceQuery.data ?? []) as Row[];
-    }
-  }
-
-  const modelById = new Map(models.map((row) => [row.id, row]));
-  const benchmarkById = new Map(benchmarks.map((row) => [row.id, row]));
-  const evidenceByResult = new Map<string, Row[]>();
-  for (const item of evidence) {
-    evidenceByResult.set(item.result_id, [...(evidenceByResult.get(item.result_id) ?? []), item]);
-  }
-
-  // Results are grouped by the exact benchmark, version and harness.
-  // Scores from different setups are deliberately never compared.
-  const groups = new Map<string, { benchmark: Row; version: string; harness: string; rows: Row[] }>();
-  for (const result of results) {
-    const model = modelById.get(result.model_id);
-    const benchmark = benchmarkById.get(result.benchmark_id);
-    const sources = evidenceByResult.get(result.id) ?? [];
-    if (!model || !benchmark || sources.length === 0) continue;
-    const key = [result.benchmark_id, result.evaluation_version, result.harness].join("::");
-    const group: { benchmark: Row; version: string; harness: string; rows: Row[] } = groups.get(key) ?? {
-      benchmark,
-      version: result.evaluation_version,
-      harness: result.harness,
-      rows: [],
-    };
-    group.rows.push({ ...result, model, sources });
-    groups.set(key, group);
-  }
-
-  const sortedGroups = [...groups.values()].map((group) => ({
-    ...group,
-    rows: group.rows.sort((a, b) => {
-      const delta = Number(a.score) - Number(b.score);
-      return group.benchmark.higher_is_better ? -delta : delta;
-    }),
-  }));
-
-  const text = en ? {
-    kicker: "TRANSPARENT BENCHMARKS",
-    title: "AI model rankings",
-    intro: "A benchmark score is meaningful only with its test, version and evaluation setup. We show the evidence behind every published result.",
-    ruleTitle: "How to read these rankings",
-    rule1: "Only results with a traceable source are eligible for publication.",
-    rule2: "Different benchmarks, versions and evaluation harnesses are shown separately — never blended into one invented score.",
-    rule3: "Provider-reported and independently measured results are clearly distinguished.",
-    empty: "No sourced benchmark results have been published yet.",
-    emptyHint: "We are building the evidence base first. We will not fill this page with guessed scores or unsourced model rankings.",
-    unavailable: "The rankings database is not ready yet. The database migration must be applied before results can be displayed.",
-    methodology: "Methodology and evidence",
-    result: "Result",
-    model: "Model",
-    source: "Evidence",
-    date: "Evaluation date",
-    sample: "Samples",
-    independent: "Independently measured",
-    provider_reported: "Reported by provider",
-    aggregated: "Leaderboard / aggregator",
-    noSample: "Not disclosed",
-    benchmarkSource: "Benchmark methodology",
-    checked: "Source checked",
-    directoryTitle: "Benchmarks we track",
-    modelsTitle: "Model directory",
-    modelsText: "Models are listed only when we can point to an official provider page. A listing is not an endorsement or an overall quality ranking.",
-    providerNote: "In model directory · benchmark result not yet added",
-    coverageTitle: "Current benchmark coverage",
-    coverageText: "The page now includes a comparable Arena Agent Arena Index snapshot across OpenAI, Anthropic and Google, alongside separately labeled provider-reported DeepSeek results. These are distinct evaluation sources and must not be compared across benchmark groups.",
-    directoryText: "These are separate evaluation systems, not one combined ranking. Open each source to inspect its current release and methodology.",
-    caution: "Important caveat",
+  const labels = en ? {
+    kicker: "AI, MADE COMPARABLE",
+    title: "Find the right AI for the job",
+    intro: "Five simple rankings for the tasks people actually use AI for. Each list comes from a specialist public leaderboard — scores from different lists are not compared with each other.",
+    how: "How to read this page",
+    howText: "Choose the task you care about. The source, date and scoring method are shown for every list. A dash means the source showed a rank but did not expose a score in the captured result.",
+    rank: "Rank",
+    model: "AI model",
+    company: "Developer",
+    score: "Score",
+    details: "Settings",
+    source: "Open original leaderboard",
+    updated: "Source checked",
+    note: "Important note",
+    overallNote: "There is no reliable single score that combines chat, coding, image generation and video generation into one multimodal winner. The first list is a broad capability benchmark, while images and video are ranked separately.",
+    footer: "Rankings are snapshots, not permanent winners. Model releases and leaderboard positions change, so always check the original source for the latest result.",
   } : {
-    kicker: "ПРОЗОРІ БЕНЧМАРКИ",
-    title: "Рейтинги AI-моделей",
-    intro: "Результат тесту має сенс лише разом із назвою тесту, його версією та умовами оцінювання. Ми показуємо джерела кожного опублікованого результату.",
-    ruleTitle: "Як читати ці рейтинги",
-    rule1: "Публікуємо лише результати з перевірюваним джерелом.",
-    rule2: "Різні бенчмарки, версії та умови тестування показуємо окремо — без вигаданого загального бала.",
-    rule3: "Результати незалежних тестів і заяви самих розробників чітко розрізняємо.",
-    empty: "Поки що немає опублікованих результатів із підтвердженими джерелами.",
-    emptyHint: "Спочатку формуємо доказову базу. Не будемо заповнювати сторінку здогадками або рейтингами без першоджерел.",
-    unavailable: "База рейтингів ще не готова. Щоб показувати результати, потрібно застосувати міграцію бази даних.",
-    methodology: "Методологія та джерела",
-    result: "Результат",
-    model: "Модель",
-    source: "Докази",
-    date: "Дата тесту",
-    sample: "Вибірка",
-    independent: "Незалежне тестування",
-    provider_reported: "Заявлено розробником",
-    aggregated: "Лідерборд / агрегатор",
-    noSample: "Не вказано",
-    benchmarkSource: "Методологія тесту",
-    checked: "Джерело перевірено",
-    directoryTitle: "Бенчмарки, за якими ми стежимо",
-    modelsTitle: "Каталог AI-моделей",
-    modelsText: "Додаємо моделі лише за наявності офіційної сторінки розробника. Наявність у каталозі не є оцінкою якості чи рекомендацією.",
-    providerNote: "У каталозі · результат тесту ще не додано",
-    coverageTitle: "Поточне покриття рейтингів",
-    coverageText: "На сторінці є зіставний знімок Arena Agent Arena Index для моделей OpenAI, Anthropic і Google, а також окремо позначені результати DeepSeek, заявлені самим розробником. Це різні системи оцінювання, їх не можна порівнювати між собою.",
-    directoryText: "Це окремі системи оцінювання, а не один спільний рейтинг. Відкривайте першоджерела, щоб перевіряти актуальну версію та методологію.",
-    caution: "Важливе застереження",
+    kicker: "ШІ — ЗРОЗУМІЛО І ПОРІВНЮВАНО",
+    title: "Обери ШІ для свого завдання",
+    intro: "П’ять простих рейтингів для завдань, заради яких люди найчастіше користуються ШІ. Кожен список узято з профільного відкритого рейтингу — бали з різних списків не порівнюються між собою.",
+    how: "Як читати цю сторінку",
+    howText: "Обери потрібне завдання. Для кожного списку вказано джерело, дату й спосіб оцінювання. Тире означає, що джерело показало місце моделі, але не відкрило її бал у доступному результаті.",
+    rank: "Місце",
+    model: "Модель ШІ",
+    company: "Розробник",
+    score: "Бал",
+    details: "Налаштування",
+    source: "Відкрити оригінальний рейтинг",
+    updated: "Джерело перевірено",
+    note: "Важливо",
+    overallNote: "Немає надійного єдиного бала, який об’єднує чат, програмування, створення зображень і відео та визначає одного мультимодального переможця. Перший список — це широкий тест можливостей, а зображення й відео оцінюються окремо.",
+    footer: "Рейтинги — це зріз на конкретну дату, а не вічні переможці. Моделі й позиції змінюються, тому для найновіших результатів перевіряй першоджерело.",
   };
 
   return (
-    <main className="ranking-page page-shell">
+    <main className="ranking-page page-shell ranking-simple">
       <header className="ranking-hero">
-        <div className="section-kicker">{text.kicker}</div>
-        <h1>{text.title}<span>.</span></h1>
-        <p>{text.intro}</p>
+        <div className="section-kicker">{labels.kicker}</div>
+        <h1>{labels.title}<span>.</span></h1>
+        <p>{labels.intro}</p>
       </header>
 
-      <section className="ranking-principles" aria-labelledby="ranking-principles-title">
-        <h2 id="ranking-principles-title">{text.ruleTitle}</h2>
-        <ul><li>{text.rule1}</li><li>{text.rule2}</li><li>{text.rule3}</li></ul>
+      <section className="ranking-principles" aria-labelledby="ranking-how-title">
+        <h2 id="ranking-how-title">{labels.how}</h2>
+        <p>{labels.howText}</p>
       </section>
 
-      {!unavailable && results.length > 0 && (
-        <aside className="ranking-coverage-notice" aria-label={text.coverageTitle}>
-          <strong>{text.coverageTitle}</strong>
-          <p>{text.coverageText}</p>
-        </aside>
-      )}
-
-      {unavailable ? (
-        <div className="ranking-empty"><h2>{text.unavailable}</h2><p>{text.emptyHint}</p></div>
-      ) : sortedGroups.length === 0 ? (
-        <div className="ranking-empty"><h2>{text.empty}</h2><p>{text.emptyHint}</p></div>
-      ) : (
-        <div className="ranking-groups">
-          {sortedGroups.map((group) => (
-            <section className="ranking-group" key={group.benchmark.id + group.version + group.harness}>
-              <div className="ranking-group-heading">
-                <div>
-                  <span className="ranking-category">{group.benchmark.category}</span>
-                  <h2>{group.benchmark.name}</h2>
-                  <p>{group.version} · {group.harness}</p>
-                </div>
-                <a href={group.benchmark.leaderboard_url || group.benchmark.methodology_url} target="_blank" rel="noreferrer">{text.benchmarkSource} ↗</a>
+      <div className="ranking-simple-list">
+        {rankings.map((ranking, index) => (
+          <section className="ranking-simple-card" key={ranking.title}>
+            <div className="ranking-simple-heading">
+              <div>
+                <span className="ranking-category">{en ? `RANKING 0${index + 1}` : `РЕЙТИНГ 0${index + 1}`}</span>
+                <h2>{en ? ranking.title : [
+                  "Загальні можливості ШІ",
+                  "Текст, написання та спілкування",
+                  "Програмування та код",
+                  "Створення зображень",
+                  "Створення відео",
+                ][index]}</h2>
+                <p>{en ? ranking.description : [
+                  "Широке порівняння логіки, знань, програмування та повсякденних робочих завдань.",
+                  "Який ШІ дає людям найкращі відповіді у звичайних розмовах, поясненнях і написанні текстів.",
+                  "Порівняння моделей на практичних завданнях із програмування, зокрема створенні вебзастосунків.",
+                  "Які моделі створюють найкращі зображення за однаковим текстовим запитом.",
+                  "Які моделі створюють найкращі відео за текстовим запитом.",
+                ][index]}</p>
               </div>
-              <div className="ranking-table-wrap">
-                <table className="ranking-table">
-                  <thead><tr><th>#</th><th>{text.model}</th><th>{text.result}</th><th>{text.date}</th><th>{text.sample}</th><th>{text.source}</th></tr></thead>
-                  <tbody>
-                    {group.rows.map((row, index) => (
-                      <tr key={row.id}>
-                        <td>{index + 1}</td>
-                        <td>{row.model.official_url ? <a href={row.model.official_url} target="_blank" rel="noreferrer">{row.model.name}</a> : row.model.name}<small>{row.model.provider}</small></td>
-                        <td className="ranking-score">{Number(row.score).toLocaleString(en ? "en-US" : "uk-UA", { maximumFractionDigits: 3 })} {row.score_unit}</td>
-                        <td>{new Date(row.evaluation_date + "T00:00:00").toLocaleDateString(en ? "en-US" : "uk-UA")}</td>
-                        <td>{row.sample_size ?? text.noSample}</td>
-                        <td><div className="ranking-evidence"><span>{text[row.evidence_grade as keyof typeof text] ?? row.evidence_grade}</span>{row.sources.map((source: Row) => <a key={source.id} href={source.source_url} target="_blank" rel="noreferrer">{source.source_title} ↗</a>)}</div></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="ranking-simple-meta">
+                <span>{ranking.metric}</span>
+                <small>{labels.updated}: {ranking.updated}</small>
               </div>
-            </section>
-          ))}
-        </div>
-      )}
+            </div>
+            <div className="ranking-simple-table-wrap">
+              <table className="ranking-simple-table">
+                <thead><tr><th>{labels.rank}</th><th>{labels.model}</th><th>{labels.company}</th><th>{labels.score}</th><th>{labels.details}</th></tr></thead>
+                <tbody>
+                  {ranking.entries.map((entry, rowIndex) => (
+                    <tr key={entry.name + (entry.detail ?? "")}>
+                      <td className="ranking-simple-position">{rowIndex + 1}</td>
+                      <td className="ranking-simple-model">{entry.name}</td>
+                      <td>{entry.provider}</td>
+                      <td className="ranking-simple-score">{entry.score}</td>
+                      <td>{entry.detail ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {ranking.caveat && <p className="ranking-simple-caveat"><strong>{labels.note}:</strong> {ranking.caveat}</p>}
+            <div className="ranking-simple-source">
+              <a href={ranking.sourceUrl} target="_blank" rel="noreferrer">{labels.source} ↗</a>
+              <span>{ranking.sourceName}</span>
+            </div>
+          </section>
+        ))}
+      </div>
 
-      {!unavailable && models.length > 0 && (
-        <section className="ranking-model-directory">
-          <div className="ranking-directory-heading">
-            <h2>{text.modelsTitle}</h2>
-            <p>{text.modelsText}</p>
-          </div>
-          <div className="ranking-model-grid">
-            {models.map((model) => (
-              <article className="ranking-model-card" key={model.id}>
-                <div className="ranking-model-card-top">
-                  <span className="ranking-category">{model.provider}</span>
-                  <span className="ranking-model-date">{model.release_date ? new Date(model.release_date + "T00:00:00").toLocaleDateString(en ? "en-US" : "uk-UA") : ""}</span>
-                </div>
-                <h3>{model.official_url ? <a href={model.official_url} target="_blank" rel="noreferrer">{model.name} ↗</a> : model.name}</h3>
-                <p>{[model.model_family, model.model_type].filter(Boolean).join(" · ")}</p>
-                <span className="ranking-provider-note">{results.some((result) => result.model_id === model.id) ? (en ? "Has sourced result(s)" : "Є результати з джерелами") : text.providerNote}</span>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {!unavailable && benchmarks.length > 0 && (
-        <section className="ranking-directory">
-          <div className="ranking-directory-heading">
-            <h2>{text.directoryTitle}</h2>
-            <p>{text.directoryText}</p>
-          </div>
-          <div className="ranking-directory-grid">
-            {benchmarks.map((benchmark) => (
-              <article className="ranking-directory-card" key={benchmark.id}>
-                <span className="ranking-category">{benchmark.category}</span>
-                <h3>{benchmark.name}</h3>
-                <p>{benchmark.description}</p>
-                {benchmark.slug === "swe-bench-verified" && (
-                  <p className="ranking-caution">{text.caution}: {en
-                    ? "Independent reviews have raised concerns about contamination and test validity. We will show its results separately and with this context."
-                    : "Незалежні огляди вказували на ризик витоку завдань і проблеми валідності тестів. Результати показуватимемо окремо й з цим контекстом."}</p>
-                )}
-                <div className="ranking-directory-links">
-                  <a href={benchmark.methodology_url} target="_blank" rel="noreferrer">{text.benchmarkSource} ↗</a>
-                  {benchmark.leaderboard_url && <a href={benchmark.leaderboard_url} target="_blank" rel="noreferrer">{en ? "Leaderboard" : "Таблиця результатів"} ↗</a>}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="ranking-methodology">
-        <h2>{text.methodology}</h2>
-        <p>{en
-          ? "Each row retains its original benchmark, version, harness, date, sample size and evidence links. A high score in one test does not imply that a model is best overall. We do not calculate a composite rank until there is a defensible, documented weighting method."
-          : "Для кожного результату зберігаємо назву тесту, версію, середовище оцінювання, дату, розмір вибірки та посилання на докази. Високий бал в одному тесті не означає, що модель найкраща загалом. Загальний рейтинг не обчислюватимемо без обґрунтованої та відкритої методики зважування."}</p>
+      <section className="ranking-methodology ranking-simple-methodology">
+        <h2>{labels.note}</h2>
+        <p>{labels.overallNote} {labels.footer}</p>
       </section>
     </main>
   );
