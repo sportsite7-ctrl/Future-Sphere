@@ -72,12 +72,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <section className="latest-section"><div className="page-shell latest-layout">
         <div className="latest-main"><div className="section-heading"><div><div className="section-kicker">{copy.freshView}</div><h2>{copy.latest}<span>.</span></h2></div>{latest.some((story) => story.isDemo) || lead.isDemo ? <span className="demo-status"><i /> {copy.demoFeed}</span> : <span className="demo-status"><i /> {locale === "en" ? "Published stories" : "Опубліковані матеріали"}</span>}</div>
           <div className="latest-grid">{latest.map((story) => <NewsCard key={story.slug} story={story} locale={locale} />)}</div>
-          <Link href="/news" className="text-link all-news-link">{copy.allMaterials} <span>↗</span></Link>
+          <Link href={pathFor("/news")} className="text-link all-news-link">{copy.allMaterials} <span>↗</span></Link>
           <Pagination page={page} totalPages={totalPages} basePath="/" locale={locale} />
         </div>
         <aside className="editorial-aside">
-          <div className="aside-card aside-note"><span className="aside-number">01 / {locale === "en" ? "PRINCIPLE" : "ПРИНЦИП"}</span><div className="aside-orbit"><span /><i /><b /></div><h3>{copy.lessNoise}<br />{copy.moreUnderstanding}</h3><p>{copy.editorialText}</p><Link href="/about" className="text-link">{copy.editorialApproach} <span>↗</span></Link></div>
-          <div className="aside-card aside-topics"><span className="aside-number">{copy.focus}</span><h3>{copy.focusTitle}</h3><ul><li><Link href="/category/ai-models">{copy.newModels} <span>↗</span></Link></li><li><Link href={pathFor("/category/tools")}>{copy.aiTools} <span>↗</span></Link></li><li><Link href={pathFor("/category/research")}>{copy.openResearch} <span>↗</span></Link></li><li><Link href={pathFor("/category/technology")}>{copy.newTech} <span>↗</span></Link></li></ul></div>
+          <div className="aside-card aside-note"><span className="aside-number">01 / {locale === "en" ? "PRINCIPLE" : "ПРИНЦИП"}</span><div className="aside-orbit"><span /><i /><b /></div><h3>{copy.lessNoise}<br />{copy.moreUnderstanding}</h3><p>{copy.editorialText}</p><Link href={pathFor("/about")} className="text-link">{copy.editorialApproach} <span>↗</span></Link></div>
+          <div className="aside-card aside-topics"><span className="aside-number">{copy.focus}</span><h3>{copy.focusTitle}</h3><ul><li><Link href={pathFor("/category/ai-models")}>{copy.newModels} <span>↗</span></Link></li><li><Link href={pathFor("/category/tools")}>{copy.aiTools} <span>↗</span></Link></li><li><Link href={pathFor("/category/research")}>{copy.openResearch} <span>↗</span></Link></li><li><Link href={pathFor("/category/technology")}>{copy.newTech} <span>↗</span></Link></li></ul></div>
         </aside>
       </div></section>
       <section className="manifesto page-shell"><div className="manifesto-mark"><BrandSymbol large /></div><div><div className="section-kicker">FUTURE SPHERE</div><h2>{copy.manifestoTitle}<br /><span>{copy.manifestoSub}</span></h2></div><p>{copy.manifestoText}</p></section>
