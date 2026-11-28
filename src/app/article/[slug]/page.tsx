@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title,
     description,
     alternates: { canonical },
+    robots: story.isDemo ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
       type: "article",
       url: canonical,
@@ -51,7 +52,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   if (!original) notFound();
   const story = localizeStory(original, locale);
   const related = stories.filter((item) => item.slug !== story.slug).slice(0, 2).map((item) => localizeStory(item, locale));
-  const canonical = `https://future-sphere-henna.vercel.app/article/${slug}`;
+  const canonical = localeUrl(locale, `/article/${slug}`);
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
