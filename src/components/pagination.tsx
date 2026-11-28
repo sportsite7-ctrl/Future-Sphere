@@ -12,7 +12,8 @@ export function Pagination({
   locale: "uk" | "en";
 }) {
   if (totalPages <= 1) return null;
-  const href = (value: number) => value === 1 ? basePath : `${basePath}?page=${value}`;
+  const localizedBase = `/${locale}${basePath === "/" ? "" : basePath}`;
+  const href = (value: number) => value === 1 ? localizedBase : `${localizedBase}?page=${value}`;
   const previous = page > 1 ? page - 1 : null;
   const next = page < totalPages ? page + 1 : null;
   return (
