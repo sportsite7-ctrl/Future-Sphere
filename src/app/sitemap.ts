@@ -2,33 +2,57 @@ import type { MetadataRoute } from "next";
 import { getCategories, getStories } from "@/lib/content";
 
 const siteUrl = "https://future-sphere-henna.vercel.app";
+const localized = (locale: "uk" | "en", path: string) => `${siteUrl}/${locale}${path === "/" ? "" : path}`;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, stories] = await Promise.all([
-    getCategories("uk"),
-    getStories("uk"),
+  const [ukCategories, enCategories, ukStories, enStories] = await Promise.all([
+    getCategories("uk"), getCategories("en"), getStories("uk"), getStories("en")
   ]);
+  const pages: MetadataRoute.Sitemap = [];
+  for (const path of ["/", "/news", "/about", "/rankings"]) {
+    pages.push({
+      url: localized("uk", path),
+      changeFrequency: path === "/" || path === "/news" ? "daily" : "weekly",
+      priority: path === "/" ? 1 : path === "/news" ? 0.9 : 0.6,
+      alternates: { languages: { "uk-UA": localized("uk", path), "en-US": localized("en", path) } }
+    });
+    pages.push({
+      url: localized("en", path),
+      changeFrequency: path === "/" || path === "/news" ? "daily" : "weekly",
+      priority: path === "/" ? 1 : path === "/news" ? 0.9 : 0.6,
+      alternates: { languages: { "uk-UA": localized("uk", path), "en-US": localized("en", path) } }
+    });
+  }
 
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: siteUrl, changeFrequency: "daily", priority: 1 },
-    { url: `${siteUrl}/news`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${siteUrl}/rankings`, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${siteUrl}/about`, changeFrequency: "monthly", priority: 0.5 },
-  ];
+  const enCategorySlugs = new Set(enCategories.map((item) => item.slug));
+  for (const category of ukCategories) {
+    if (!enCategorySlugs.has(category.slug)) continue;
+    const path = `/category/${category.slug}`;
+    pages.push({
+      url: localized("uk", path), changeFrequency: "daily", priority: 0.7,
+      alternates: { languages: { "uk-UA": localized("uk", path), "en-US": localized("en", path) } }
+    });
+    pages.push({
+      url: localized("en", path), changeFrequency: "daily", priority: 0.7,
+      alternates: { languages: { "uk-UA": localized("uk", path), "en-US": localized("en", path) } }
+    });
+  }
 
-  const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
-    url: `${siteUrl}/category/${category.slug}`,
-    changeFrequency: "daily",
-    priority: 0.7,
-  }));
-
-  const articlePages: MetadataRoute.Sitemap = stories
-    .filter((story) => !story.isDemo)
-    .map((story) => ({
-      url: `${siteUrl}/article/${story.slug}`,
+  for (const story of ukStories.filter((item) => !item.isDemo)) {
+    pages.push({
+      url: localized("uk", `/article/${story.slug}`),
+      lastModified: story.publishedAt ? new Date(story.publishedAt) : undefined,
       changeFrequency: "weekly",
-      priority: 0.6,
-    }));
-
-  return [...staticPages, ...categoryPages, ...articlePages];
+      priority: 0.6
+    });
+  }
+  for (const story of enStories.filter((item) => !item.isDemo)) {
+    pages.push({
+      url: localized("en", `/article/${story.slug}`),
+      lastModified: story.publishedAt ? new Date(story.publishedAt) : undefined,
+      changeFrequency: "weekly",
+      priority: 0.6
+    });
+  }
+  return pages;
 }
