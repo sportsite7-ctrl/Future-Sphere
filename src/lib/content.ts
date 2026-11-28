@@ -151,6 +151,7 @@ export async function getStories(locale: Locale): Promise<Story[]> {
         const displayImage = hasVerifiedRssImage ? article.image_url as string : editorialImage.url;
         const displayAlt = hasVerifiedRssImage && article.image_alt ? article.image_alt : editorialImage.alt;
         result.push({
+          translationId: article.id,
           slug: translation.slug,
           category: categoryName,
           categorySlug,
