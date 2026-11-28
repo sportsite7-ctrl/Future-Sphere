@@ -8,12 +8,14 @@ import { t, localizeStory } from "@/lib/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
+  const hasRealStories = (await getStories(locale)).some((story) => !story.isDemo);
   return {
     title: locale === "en" ? "Latest AI News" : "Останні новини про штучний інтелект",
     description: locale === "en"
       ? "Browse the latest artificial intelligence news, model announcements, research and industry updates."
       : "Читайте останні новини про штучний інтелект, запуск моделей, дослідження та події індустрії.",
-    alternates: { canonical: localeUrl(locale, "/news"), languages: { "uk-UA": localeUrl("uk", "/news"), "en-US": localeUrl("en", "/news") } }, 
+    alternates: { canonical: localeUrl(locale, "/news"), languages: { "uk-UA": localeUrl("uk", "/news"), "en-US": localeUrl("en", "/news") } },
+    robots: hasRealStories ? { index: true, follow: true } : { index: false, follow: true },
   };
 }
 
