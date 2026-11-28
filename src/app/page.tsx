@@ -11,12 +11,14 @@ import { Pagination } from "@/components/pagination";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
+  const hasRealStories = (await getStories(locale)).some((story) => !story.isDemo);
   return {
     title: locale === "en" ? "AI News, Research & Tools" : "Новини ШІ, дослідження та інструменти",
     description: locale === "en"
       ? "Follow the latest AI news, model releases, research and tools with context and links to original sources."
       : "Останні новини штучного інтелекту, нові моделі, дослідження та інструменти з поясненнями й посиланнями на першоджерела.",
     alternates: { canonical: localeUrl(locale, "/"), languages: { "uk-UA": localeUrl("uk", "/"), "en-US": localeUrl("en", "/") } },
+    robots: hasRealStories ? { index: true, follow: true } : { index: false, follow: true },
   };
 }
 
