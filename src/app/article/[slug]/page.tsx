@@ -12,8 +12,13 @@ export async function generateStaticParams() { return []; }
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const locale = await getLocale();
-  const story = (await getStories(locale)).find((item) => item.slug === slug);
+  const stories = await getStories(locale);
+  const story = stories.find((item) => item.slug === slug);
   if (!story) return {};
+  const otherLocale = locale === "uk" ? "en" : "uk";
+  const counterpart = story.translationId
+    ? (await getStories(otherLocale)).find((item) => item.translationId === story.translationId && !item.isDemo)
+    : undefined;
   const localized = localizeStory(story, locale);
   const title = localized.seoTitle || localized.title;
   const description = localized.seoDescription || localized.excerpt;
@@ -21,7 +26,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: {
+      canonical,
+      ...(counterpart ? { languages: {
+        "uk-UA": localeUrl("uk", `/article/${locale === "uk" ? story.slug : counterpart.slug}`),
+        "en-US": localeUrl("en", `/article/${locale === "en" ? story.slug : counterpart.slug}`)
+      } } : {})
+    },
     robots: story.isDemo ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
       type: "article",
