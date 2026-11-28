@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { BrandSymbol } from "@/components/brand-symbol";
 import type { Locale } from "@/lib/i18n";
@@ -9,9 +8,7 @@ import { t } from "@/lib/i18n";
 
 export function SiteHeader({ locale }: { locale: Locale }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const pathname = usePathname();
   const copy = t(locale);
-  const currentPath = (pathname || "/").replace(/^\/(uk|en)(?=\/|$)/, "") || "/";
   const pathFor = (path: string) => `/${locale}${path === "/" ? "" : path}`;
   const navItems = [
     { label: copy.navNews, href: "/news" },
