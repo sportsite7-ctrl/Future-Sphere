@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandSymbol } from "@/components/brand-symbol";
-import { getLocale } from "@/lib/locale";
+import { getLocale, localeUrl } from "@/lib/locale";
 import { t } from "@/lib/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -11,16 +11,17 @@ export async function generateMetadata(): Promise<Metadata> {
     description: locale === "en"
       ? "Learn about Future Sphere's approach to AI news, research, original sources and clear technology explanations."
       : "Дізнайтеся про редакційний підхід Future Sphere до новин ШІ, досліджень, першоджерел і пояснення технологій.",
-    alternates: { canonical: "/about" },
+    alternates: { canonical: localeUrl(locale, "/about"), languages: { "uk-UA": localeUrl("uk", "/about"), "en-US": localeUrl("en", "/about") } }, 
   };
 }
 
 export default async function AboutPage() {
   const locale = await getLocale();
   const copy = t(locale);
+  const homePath = `/${locale}`;
   return (
     <section className="about-page page-shell">
-      <div className="article-breadcrumb"><Link href="/">{copy.home}</Link><span>/</span><span>{copy.about}</span></div>
+      <div className="article-breadcrumb"><Link href={homePath}>{copy.home}</Link><span>/</span><span>{copy.about}</span></div>
       <div className="about-hero">
         <div className="about-symbol"><BrandSymbol large /></div>
         <div className="section-kicker">{copy.aboutKicker}</div>
