@@ -6,16 +6,17 @@ import { NewsImage } from "@/components/news-image";
 
 export function NewsCard({ story, locale = "uk" }: { story: Story; locale?: Locale }) {
   const copy = t(locale);
+  const articleHref = `/${locale}/article/${story.slug}`;
   return (
     <article className="news-card">
-      <Link href={`/article/${story.slug}`} className="card-image-link" aria-label={story.title}>
+      <Link href={articleHref} className="card-image-link" aria-label={story.title}>
         <div className="card-image-wrap"><NewsImage src={story.image} alt={story.imageAlt} className="card-image" /><span className="image-category">{story.category}</span></div>
       </Link>
       <div className="card-copy">
         <div className="card-meta"><span>{story.date}</span><i /> <span>{story.readTime}</span></div>
-        <h3><Link href={`/article/${story.slug}`}>{story.title}</Link></h3>
+        <h3><Link href={articleHref}>{story.title}</Link></h3>
         <p>{story.excerpt}</p>
-        <Link className="text-link" href={`/article/${story.slug}`}>{copy.readArticle} <span>↗</span></Link>
+        <Link className="text-link" href={articleHref}>{copy.readArticle} <span>↗</span></Link>
       </div>
     </article>
   );
