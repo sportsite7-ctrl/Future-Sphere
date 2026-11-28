@@ -92,7 +92,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         {story.isDemo && <div className="article-demo-note">{copy.articleDemo}</div>}
         {story.body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
         {story.sourceUrl ? <div className="article-source-note"><b>{copy.sourceNote}</b><a href={story.sourceUrl} target="_blank" rel="noreferrer">{locale === "en" ? "Open original source" : "Відкрити першоджерело"} ↗</a>{story.imageCredit && <span>{story.imageCredit}</span>}</div> : <div className="article-source-note"><b>{copy.sourceNote}</b><span>{copy.sourceText}</span></div>}
-        <Link href="/" className="back-link">{copy.backHome}</Link>
+        <Link href={pathFor("/")} className="back-link">{copy.backHome}</Link>
       </div></div>
       <aside className="article-sidebar">
         <div className="article-sidebar-card">
