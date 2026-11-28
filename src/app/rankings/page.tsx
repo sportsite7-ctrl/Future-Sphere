@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getLocale } from "@/lib/locale";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -28,39 +28,39 @@ type Ranking = {
 const rankings: Ranking[] = [
   {
     title: "Overall AI capabilities",
-    description: "A broad comparison of reasoning, knowledge, coding and everyday work. This is the closest thing to an all-round score — it is not a dedicated image or video ranking.",
+    description: "A broad test of knowledge, reasoning, coding and practical work. It is the closest available all-round comparison, but not a universal score for every AI task.",
     sourceName: "Artificial Analysis Intelligence Index v5.0.2",
-    sourceUrl: "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index",
+    sourceUrl: "https://artificialanalysis.ai/models",
     updated: "28 Nov 2026",
     metric: "Index score · higher is better",
     entries: [
-      { name: "Claude Fable 5.2", provider: "Anthropic", score: "65", detail: "Max configuration" },
-      { name: "Claude Fable 5.2", provider: "Anthropic", score: "62", detail: "Xhigh configuration" },
-      { name: "GPT-6.2 Astra", provider: "OpenAI", score: "62", detail: "Max configuration" },
-      { name: "Claude Fable 5.2", provider: "Anthropic", score: "62", detail: "High configuration" },
-      { name: "GPT-6.2 Astra", provider: "OpenAI", score: "62", detail: "Xhigh configuration" },
+      { name: "Claude Fable 5.2", provider: "Anthropic", score: "65", detail: "Max" },
+      { name: "Claude Fable 5.2", provider: "Anthropic", score: "62", detail: "xHigh" },
+      { name: "GPT-6.2 Astra", provider: "OpenAI", score: "62", detail: "Max" },
+      { name: "Claude Fable 5.2", provider: "Anthropic", score: "62", detail: "High" },
+      { name: "GPT-6.2 Astra", provider: "OpenAI", score: "62", detail: "xHigh" },
     ],
-    caveat: "The same model can appear more than once when different settings are tested. These are benchmark configurations, not five different AI products.",
+    caveat: "The index combines several text and practical-work evaluations. It is not a dedicated image or video test, and different settings of the same model are listed separately.",
   },
   {
     title: "Text, writing & everyday chat",
-    description: "Which AI gives people the most preferred answers in ordinary conversations, explanations and writing tasks.",
+    description: "Models ranked by people's preferences in everyday conversations, explanations and writing.",
     sourceName: "Arena Text Leaderboard",
     sourceUrl: "https://arena.ai/leaderboard/chat/text",
     updated: "22 Nov 2026",
     metric: "Arena rating · higher is better",
     entries: [
       { name: "Gemini 4 Carbon", provider: "Google", score: "1,527", detail: "High" },
-      { name: "Gemini 4 Argon", provider: "Google", score: "1,520", detail: "High" },
-      { name: "Gemini 4 Neon", provider: "Google", score: "—", detail: "xHigh · rank 3" },
-      { name: "Muse Wonder", provider: "Meta", score: "—", detail: "Max · rank 4" },
-      { name: "Claude Opus 5.5", provider: "Anthropic", score: "—", detail: "High · rank 5" },
+      { name: "Gemini 4 Argon", provider: "Google", score: "—", detail: "Rank 2 · High" },
+      { name: "Gemini 4 Neon", provider: "Google", score: "—", detail: "Rank 3 · xHigh" },
+      { name: "Muse Wonder", provider: "Meta", score: "—", detail: "Rank 4 · Max" },
+      { name: "Claude Opus 5.5", provider: "Anthropic", score: "—", detail: "Rank 5 · High" },
     ],
-    caveat: "The source shows the exact rating for the leader and ranks for the remaining entries. We do not fill in ratings that were not disclosed in the captured source.",
+    caveat: "Arena's current page exposes the exact rating for the leader and the ordered top five. Unpublished ratings are shown as a dash rather than estimated.",
   },
   {
     title: "Programming & coding",
-    description: "Models compared on practical coding tasks, including building web apps and working with code.",
+    description: "Models compared on real-world coding prompts, especially building and editing web apps.",
     sourceName: "Arena Code / WebDev Leaderboard",
     sourceUrl: "https://arena.ai/leaderboard/code/webdev",
     updated: "22 Nov 2026",
@@ -70,32 +70,32 @@ const rankings: Ranking[] = [
       { name: "Claude Opus 5.5", provider: "Anthropic", score: "1,820", detail: "Max" },
       { name: "Claude Sonnet 5.5", provider: "Anthropic", score: "1,772", detail: "xHigh" },
       { name: "Gemini 4 Carbon", provider: "Google", score: "1,769", detail: "High" },
-      { name: "Gemini 4 Neon", provider: "Google", score: "—", detail: "High · rank 5" },
+      { name: "Gemini 4 Neon", provider: "Google", score: "—", detail: "Rank 5 · High" },
     ],
-    caveat: "This board focuses on building web apps. It is a practical coding comparison, not a test of every possible programming language or workflow.",
+    caveat: "This is a practical web-app building comparison, not a complete test of every programming language. The source page does not expose the fifth model's exact rating in its summary.",
   },
   {
     title: "Image generation",
-    description: "Which models create images that people prefer when given the same text prompt.",
+    description: "Models ranked by human preference when generating an image from the same text prompt.",
     sourceName: "Artificial Analysis Image Arena v2.1",
     sourceUrl: "https://artificialanalysis.ai/image/leaderboard/text-to-image",
     updated: "28 Nov 2026",
     metric: "Elo rating · higher is better",
     entries: [
-      { name: "GPT Image 2.6 Sunburst", provider: "OpenAI", score: "1,266" },
-      { name: "GPT Image 2.5 Sunburst", provider: "OpenAI", score: "1,230" },
-      { name: "GPT Image 2.6 Flare", provider: "OpenAI", score: "1,227" },
-      { name: "MAI-Image-2.7", provider: "Microsoft", score: "1,216" },
-      { name: "GPT Image 2.5 Flare", provider: "OpenAI", score: "1,212" },
+      { name: "GPT Image 2.5", provider: "OpenAI", score: "1,223", detail: "Sunburst · Max" },
+      { name: "GPT Image 2.5", provider: "OpenAI", score: "1,207", detail: "Flare · Max" },
+      { name: "GPT Image 2", provider: "OpenAI", score: "1,189", detail: "High" },
+      { name: "Nano Banana 2.1", provider: "Google", score: "1,176" },
+      { name: "Grok Imagine Image 2.0", provider: "xAI", score: "1,168" },
     ],
-    caveat: "This ranking is for generating an image from text. Image editing is measured separately.",
+    caveat: "This list is for creating an image from a text prompt. Editing an existing image is measured separately.",
   },
   {
     title: "Video generation",
-    description: "Which models produce the most preferred videos from text prompts.",
-    sourceName: "Artificial Analysis Text-to-Video v2.1",
+    description: "Models ranked by human preference when generating a video with audio from a text prompt.",
+    sourceName: "Artificial Analysis Video Arena v2.1",
     sourceUrl: "https://artificialanalysis.ai/video/leaderboard/text-to-video",
-    updated: "26 Nov 2026",
+    updated: "28 Nov 2026",
     metric: "Elo rating · higher is better",
     entries: [
       { name: "Wan 3.0", provider: "Alibaba", score: "1,175" },
@@ -104,7 +104,7 @@ const rankings: Ranking[] = [
       { name: "Hyperflow H3", provider: "Video Rebirth", score: "1,156" },
       { name: "Dreamina Seedance 2.5", provider: "ByteDance", score: "1,154" },
     ],
-    caveat: "This board measures text-to-video generation. Image-to-video has a separate leaderboard.",
+    caveat: "This leaderboard measures text-to-video generation with audio. Image-to-video has a separate ranking.",
   },
 ];
 
